@@ -35,3 +35,9 @@ Inspected repository before changes: no Git repository existed in Fashion-AI or 
 Owner supplied GitHub repo https://github.com/hphuc032/Fashion-AI, configured as origin. Read-only remote inspection initially hit sandbox DNS restrictions; approved retry returned no remote heads/tags. No fetch, push, remote branch creation, merge, tag or release performed. Main/develop remain at the initial policy baseline; M0 changes committed by module on feature branch using Conventional Commits.
 
 Re-ran full M0 suite with Python 3.11.18 and explicit real FFmpeg/FFprobe paths: **26 passed in 1.75s**, zero skipped. No application code changes in Git setup, so existing browser verification remains applicable. Prepared PR description and owner-approved publishing/integration instructions in PR_M0_FOUNDATION.md and GIT_WORKFLOW.md. M0 approval is still pending; v0.1.0 is only a future release candidate name, not an existing tag. M1 not started.
+
+## 2026-11-05 — Approved M0 publication: preflight
+
+Owner approved final acceptance and explicitly authorized feature push, PR/merge into develop, integration into main and annotated v0.1.0 tag. Initial working tree clean on feature/m0-foundation at a67f1fb; main/develop at 9ccc47e. Read-only origin inspection still showed no branches or tags. Local Python 3.11.18 suite rerun: **26 passed in 2.08s**, zero skips, using real FFmpeg/FFprobe. Tracked-file audit: no .env, SQLite, uploads, media, generated screenshots, models or runtimes; no tracked file over 1 MiB; common credential-pattern scan returned no matches.
+
+Added read-only GitHub Actions M0 test check (Python 3.11, Ubuntu, real FFmpeg/FFprobe) so PR checks can be verified before merge. Official checkout/setup-python v6 tags resolved to immutable commit SHAs. CI explicitly requires all 26 tests with no skipped tests. No M1 code changes.
