@@ -6,7 +6,7 @@
 - `develop`: integration branch; merge reviewed feature pull requests here.
 - `feature/m0-foundation`: M0 implementation. No M1 work until the owner approves M0.
 
-The initial repository has a policy-only baseline on main/develop; M0 is on the feature branch until its PR is approved and merged. No remote is configured by this setup. All branches and commits are local. Nothing has been pushed or published.
+The initial repository has a policy-only baseline on main/develop; M0 is on the feature branch until its PR is approved and merged. The owner supplied `https://github.com/hphuc032/Fashion-AI`; it is configured locally as `origin`. A read-only `git ls-remote` check returned no heads or tags on 2026-11-05. All branches and commits created by this setup are local. Nothing has been pushed or published.
 
 ## Commits and review
 
@@ -20,7 +20,17 @@ Before PR: run the complete M0 suite with Python 3.11 and real FFmpeg/FFprobe co
 
 Prepared PR body: `docs/PR_M0_FOUNDATION.md`. Base `develop`, head `feature/m0-foundation`. Do not open a remote PR or push branches without explicit approval.
 
-After the owner authorizes publishing branches, configure the owner-confirmed remote and push `develop` and `feature/m0-foundation` explicitly. Open a PR using the prepared body. Do not push `main` as an incidental step.
+After the owner explicitly authorizes publishing branches, recheck origin for new history. If it is still empty, push `develop` and `feature/m0-foundation` explicitly, then open a PR using the prepared body. If new remote history exists, fetch and reconcile it first; never force-push over it. Do not push `main` as an incidental step.
+
+The following commands are prepared for a future approved publish, not executed during setup:
+
+```powershell
+git ls-remote --heads origin
+# Only after verifying no conflicting remote history and receiving approval:
+git push -u origin develop
+git push -u origin feature/m0-foundation
+gh pr create --repo hphuc032/Fashion-AI --base develop --head feature/m0-foundation --title "feat(m0): add local video import foundation" --body-file docs/PR_M0_FOUNDATION.md
+```
 
 After review and explicit merge approval, local merge instructions are:
 
