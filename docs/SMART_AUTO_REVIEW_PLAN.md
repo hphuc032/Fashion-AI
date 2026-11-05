@@ -1,0 +1,13 @@
+# Smart Auto Review plan
+
+Baseline: approved develop bb4b94a (M1 PR #2 merged by owner). Branch feature/smart-auto-review. No M2 implementation on this branch, no merge/main/tag actions. M2 will use its own branch from the same approved baseline; shared additive migration support and stale-approval invalidation can be reused as small common commits without merging feature PRs.
+
+Architecture: pure conservative translation evaluator → transactional batch actions → additive review_state and review_events tables → compact controls in M1 editor. Existing text_segments.review_status remains pending/approved/rejected for downstream compatibility. Extended states PENDING/NEEDS_REVIEW/AUTO_APPROVED/MANUALLY_APPROVED/REJECTED are mapped by review_state and current content hash. Legacy approved rows map to manual approval until edited.
+
+Only exact curated phrase translations with high OCR and all structural checks can be auto-approved. Generic fluent Argos output cannot establish semantic faithfulness; remains NEEDS_REVIEW even at OCR=1. Checks cover empty/untranslated/CJK residue, ratio, duplicate phrases, numbers/prices/sizes, Latin brand identifiers, suspicious claim language and provider errors. Score is a heuristic, never a translation probability. Manual default remains; Smart recommended; Approve All explicit confirmation. Rejected rows never implicitly approved. No external services.
+
+Audit records mode, method, status, score, reasons, content hash and timestamp. Hash includes source and translation; edits of approved content always invalidate before another explicit approval action. One transaction per bounded batch (max 100), per-row stale revision failures isolated, no-op reruns do not create audit writes. OCR replacement cascades current states and retains history with nullable segment FK.
+
+Migration support will discover local *_schema modules with version metadata and apply additive tables transactionally, backing up existing SQLite before upgrade. Version IDs: M1=1, review=20, render=30 (independent feature schemas avoid collisions). No old DB deletion/recreation.
+
+UI: review mode selector, status filter, summary counts, evaluation score/reasons, selected/page batch actions and confirmation for all-approval. Keep manual editing/translation API working. Run all 87 M0/M1 tests (real models opt-in actually executed), add evaluator/audit/batch/stale/hash/migration/UI tests and verify representative Chinese fashion text in the actual UI. Update docs/env/log, audit tracked files, Conventional Commits, push feature and PR to develop, no merge.
