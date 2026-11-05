@@ -69,3 +69,7 @@ One active render globally per DB; OCR/delivery queues exclude concurrent render
 ## Changed files
 
 Shared migration/review safety: `app/database/migrations.py`, `app/services/ocr_repository.py`. M2 schema/settings: `app/database/render_schema.py`, `app/core/config.py`, `.env.example`, `requirements-m2.txt`. Composition: `text_layout.py`, `text_compositor.py`, `inpainting_provider.py`. Persistence/preview/export: `replacement_repository.py`, `render_preview.py`, `video_renderer.py`, `render_jobs.py`, `app/render_worker.py`, OCR queue guard in `ocr_service.py`. UI: `app/ui/replacement_studio.py`, `dashboard.py`. Tests: `tests/test_m2.py`, `test_m2_real.py`, workflow. Documentation: plan, this report, README and implementation log. All service paths are under `app/services/`.
+
+## Publication
+
+Branch: [feature/m2-text-replacement](https://github.com/hphuc032/Fashion-AI/tree/feature/m2-text-replacement). Open review [PR #4](https://github.com/hphuc032/Fashion-AI/pull/4) targets approved develop c76f4c5. Commits6bd5ab6,82b556e,f63cfc3,677085b,a454581,a97bcab,3f15055,7fe4ded; final docs-only record SHA in handoff. GitHub Actions runs separate zero-skip gates26 M0/79 M1+Smart/31 M2; actual models remain the138-test local verification. See PR checks for latest hosted result. No M2 merge/tag/release or M3.
