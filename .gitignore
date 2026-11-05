@@ -59,6 +59,10 @@ temp/
 *.aac
 *.m4a
 *.flac
+*.mka
+*.ogg
+*.opus
+*.bz2
 *.srt
 *.ass
 docs/screenshots/

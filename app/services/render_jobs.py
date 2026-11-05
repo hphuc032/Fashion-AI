@@ -52,6 +52,8 @@ def queue_render(sessions,settings,project_id,token,rights_confirmed=False,regio
     try:
         with sessions() as session:
             session.connection().exec_driver_sql('BEGIN IMMEDIATE')
+            from app.services.workload_guard import ensure_idle
+            ensure_idle(session,exclude='render_jobs')
             if session.scalar(select(OCRJob.id).where(OCRJob.status.in_(ACTIVE))):
                 raise UserError('Chờ OCR/dịch hoàn tất trước khi render.')
             session.add(job)

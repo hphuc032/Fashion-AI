@@ -156,3 +156,43 @@ Render chạy worker CPU riêng, tối đa một render toàn DB, có tiến đ�
 Các biến `.env.example`: `RENDER_TIMEOUT_SECONDS=1800`, `RENDER_MAX_FRAMES=12000`, `RENDER_MAX_FPS=60`, `PREVIEW_CACHE_ENTRIES=12`; cap pixel/thời lượng nguồn dùng cấu hình M1/M0. Cache PNG preview giới hạn; frame cache M1/log/video xuất có thể tích lũy trên đĩa. Migration additive version30 tạo bản SQLite `*.pre-v30-*.db`, giữ bảng M0/M1 và tương thích review schema20, không xóa DB.
 
 Kiểm chứng Windows CPU: **138 test pass**, gồm toàn bộ M0/M1 và M2, OCR→dịch→xuất thật, AAC packet/timestamp, VFR, FPS phân số và hướng xoay. Chạy deterministic M2: `python -m pytest tests/test_m2.py -q`. Để chạy đầy đủ model thật, bật `M1_RUN_REAL=1`, `M2_RUN_REAL=1` rồi `python -m pytest -q --tb=short`; xem lệnh PowerShell, acceptance matrix và giới hạn ở [M2_TEST_REPORT.md](docs/M2_TEST_REPORT.md).
+
+## Nhận diện lời và lồng tiếng Việt (M3)
+
+M2 đã được chủ dự án merge qua PR #4 vào develop `59220ba`. M3 tạo **audio riêng**, chưa ghép vào MP4; không làm M4/subtitle. Dữ liệu speech/voice/job tách khỏi OCR/text/render, nâng cấp additive schema40 có backup, giữ bảng cũ.
+
+Cài local CPU trên Windows (FFmpeg/FFprobe có libx264; Python3.11):
+
+```powershell
+py -3.11 -m venv .venv-m3
+.\.venv-m3\Scripts\python.exe -m pip install -r requirements-m3.txt
+# Máy mới: sao chép .env.example thành .env; giữ .env hiện có nếu đã cài.
+# Đặt ASR_PROVIDER=whisper trong .env để dùng lựa chọn CPU đã kiểm chứng.
+$env:HF_HUB_DISABLE_XET='1'
+.\.venv-m3\Scripts\python.exe scripts/setup_m3_models.py --whisper --tts
+# Cần Argos/Paddle như M1 nếu chưa cài; không tải lại khi đã có:
+.\.venv-m3\Scripts\python.exe scripts/setup_m1_models.py --ocr --translation
+.\.venv-m3\Scripts\python.exe -m streamlit run app/main.py --server.address 127.0.0.1
+```
+
+Whisper base local ~148MB, TTS Việt ~81MB đã đo; chỉ tải chủ động, không tải khi khởi động ứng dụng. Có thể chọn tiny/base/small qua `--whisper-size` và đường dẫn WHISPER_MODEL_DIR riêng; base là lựa chọn đã test, tiny đã nhận sai nhiều trên mẫu thử. FunASR là adapter chính theo yêu cầu, mặc định cấu hình `funasr`, nhưng cần tự cài toolkit/model local theo phần dưới; không tuyên bố model FunASR đã chạy thật.
+
+Trong **AI Dubbing Studio**, chọn dự án, ASR local, ngôn ngữ và chunk (mặc định30s, overlap2s), nhấn **Chạy ASR**, sau đó **Nạp transcript và lịch sử**. Nhận diện chữ giản/phồn phụ thuộc model; confidence thiếu sẽ giữ trống. Không có model/audio thì báo rõ. ASR rerun yêu cầu xác nhận và chỉ thay transcript khi thành công. Speech timestamps chỉnh tay được; chunk matching thận trọng, không bảo đảm speaker/từ chính xác mọi cảnh.
+
+Chọn các câu rồi **Dịch lại các lời đã chọn** với Argos; sửa chữ Trung, câu Việt, timing, speaker và duyệt. Mọi dịch tự động pending; sửa lời/timing/speaker đã duyệt sẽ hủy duyệt cũ. Phải lưu bản sửa trước khi tạo job. Argos thực đã làm mất chi tiết quần áo (`Tôi thích cái này.`), nên cần sửa nghĩa trước khi duyệt; không dùng confidence ASR/OCR làm bằng chứng nghĩa dịch.
+
+TTS local dùng **VAIS1000/Piper, một giọng Việt đã xác minh `vais1000:0`**,22,050Hz, qua sherpa-onnx1.13.8. Chọn tốc độ/volume, nghe thử câu ngắn trước khi tạo cả video; có cấu hình chung hoặc riêng speaker và tạo lại TTS các câu được chọn. Local model không hỗ trợ pitch/gender tùy chọn, UI báo rõ. Không cloning/giả giọng tác giả. Model card dữ liệu VAIS1000 ghi CC BY4.0; xem nguồn/notice ở báo cáo. Không đưa weights vào Git.
+
+Azure chỉ là tùy chọn: đặt AZURE_SPEECH_KEY và AZURE_SPEECH_REGION trong môi trường/.env riêng, chọn Azure, xác nhận gửi chữ Việt tới Microsoft, lấy danh sách vi-VN thật rồi chọn giọng. Không hardcode giọng cloud giả định; không upload audio gốc; có thể phát sinh phí theo tài khoản. Azure chưa kiểm thử thật do không có credentials; unit test không được coi là cloud inference. Không bật cloud mặc định.
+
+**Ghép toàn bộ audio Việt** chỉ dùng lời đã approved, yêu cầu duyệt/loại hết pending và xác nhận quyền nguồn hợp lệ. ModeA chỉ lời Việt và im lặng giữa các câu. ModeB chưa triển khai: FFmpeg đơn giản không tách sạch thoại Trung khỏi nhạc. Lời ngắn giữ tốc độ tự nhiên và chừa im lặng; chênh nhẹ dùng atempo giữ pitch, mặc định factor0.85–1.20; quá dài báo rút gọn bản dịch/chỉnh timing, không cắt lời hoặc ép tốc độ cực đoan. Overlap lời bị chặn để chỉnh tay. Master WAV mono24k PCM16 đúng timeline nguồn trong một sample; có limiter/normalization.
+
+Worker nền lưu tiến độ/trạng thái, hủy/retry/phục hồi khi process chết; rerun trang không tạo lại job. Một tác vụ nặng chung OCR/render/dub mỗi DB. Source stream lưu riêng original.mka, WAV16k căn timeline cho ASR, TTS cache theo model/runtime/text/voice, các đoạn sau sync và master/manifest nằm trong thư mục audio của dự án. Nạp lịch sử để nghe/tải WAV. Chưa mux video. Cache/log/output có thể tích lũy, không tự xóa dữ liệu người dùng.
+
+FunASR tùy chọn: cài `requirements-m3-funasr.txt`, tải thủ công model Paraformer timestamp-capable từ [model zoo chính thức](https://github.com/modelscope/FunASR), đặt ASR_MODEL_DIR tới thư mục có config.yaml/weights. FUNASR_VAD_DIR, FUNASR_PUNC_DIR, FUNASR_SPEAKER_DIR chỉ nhận thư mục local đã cài, không bật remote code. Speaker model cần VAD và một chunk duy nhất để tránh đổi nhãn speaker qua chunk; mặc định speaker thủ công, không cần diarization. Tool/model FunASR thực và GPU chưa kiểm chứng trên môi trường này.
+
+Cấu hình M3 trong .env.example: provider/model paths, ngôn ngữ/device, chunk/overlap, timeout1800s, tối đa300 đoạn, ngưỡng sync. Dùng OCR_CPU_THREADS để giới hạn số thread CPU (mặc định2). Không ghi API key vào SQLite/log/manifest.
+
+Kiểm chứng: **177 test pass**, gồm toàn bộ M0–M3/Smart,38 test M3 xác định và một E2E real Whisper→Argos→duyệt→TTS Việt→WAV5s/120.000 mẫu. Chạy `python -m pytest tests/test_m3.py -q`; bật M1_RUN_REAL/M2_RUN_REAL/M3_RUN_REAL để chạy đầy đủ model thật đã cài. Fixture tiếng Trung gốc được tạo bằng model AISHELL3 tùy chọn `setup_m3_models.py --fixture-chinese`, không dùng audio creator. ASR/giọng/dịch có giới hạn chất lượng; không phải benchmark thực tế tổng quát.
+
+[M3_TEST_REPORT.md](docs/M3_TEST_REPORT.md) ghi đủ17 tiêu chí PASS/NOT TESTED, model/giấy phép, test thật so với mock, lệnh PowerShell và contract M4. Gọi `approved_dub(sessions,settings,project_id)` từ `app.services.dubbing_contract` để lấy audio/Chinese+Vietnamese transcript/timestamps/raw TTS/sync/config; hàm chặn output stale/sửa/hỏng/mất quyền. Chỉ push nhánh feature M3 và mở PR vào develop; không merge, tag v0.4.0, release hoặc làm M4.

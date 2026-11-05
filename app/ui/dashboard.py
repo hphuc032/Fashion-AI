@@ -15,8 +15,12 @@ log = logging.getLogger("fashion_ai.ui")
 def dashboard(settings: Settings, sessions: sessionmaker) -> None:
     st.title(settings.app_name)
     st.caption("Không gian video của bạn · Nhập video, OCR và bản dịch")
-    page = st.sidebar.radio("Điều hướng", ["Tổng quan", "Tải video", "Thư viện", "Nhận diện & Dịch", "Text Replacement Studio"])
-    st.sidebar.caption("Chạy cục bộ • Không sử dụng API trả phí")
+    page = st.sidebar.radio("Điều hướng", ["Tổng quan", "Tải video", "Thư viện", "Nhận diện & Dịch", "Text Replacement Studio", "AI Dubbing Studio"])
+    st.sidebar.caption("Chạy cục bộ • Cloud chỉ khi chủ động chọn")
+    if page == 'AI Dubbing Studio':
+        from app.ui.dubbing_studio import dubbing_studio
+        dubbing_studio(settings,sessions)
+        return
     if page == "Text Replacement Studio":
         from app.ui.replacement_studio import replacement_studio
         replacement_studio(settings,sessions)
