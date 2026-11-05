@@ -1,5 +1,13 @@
 # Implementation log
 
+## 2026-11-05 — Smart Auto Review
+
+Owner confirmed M1 merged; fetched origin/develop bb4b94a and verified cf95ca5 is its ancestor. Baseline M0/M1 actual-model suite: 87 passed in 25.07s. Created feature/smart-auto-review from approved develop; plan before code. Added generic additive schema discovery (M1=1, review=20, reserved render=30), pre-upgrade SQLite backups and a shared stale-approval edit fix. No main or develop mutation beyond local fast-forward synchronization.
+
+Review service checks OCR, source/translation, length, CJK residue, numeric/price/size/brand consistency, duplicate language, claims and provider errors. Only exact curated terminology plus all checks can auto-approve; unknown semantic quality stays pending. No external API. Legacy approved mapping retained. Separate state/audit records hash/mode/method/score/reasons/timestamp; current state cascades on OCR replacement, history retained. Batch cap 100, confirmation before all/selected approval, rejected protection, optimistic revisions and no-op write protection. Editor changes invalidate old approval; existing manual workflow remains.
+
+Expanded suite: 106 passed in 24.91s with actual OCR/Argos integration; final post-review run reported at handoff. Actual Brave UI verified two curated phrases auto-approved in one batch, one existing manual approval unchanged, score/reason display; screenshot local/ignored. Demo DB migration backed up and retained prior results. Smart/M2 remain separate feature PRs; shared low-level fixes can be reused without merging either PR. No tags/releases/M3.
+
 ## 2026-11-05 — M0 only (Asia/Saigon)
 
 Repository inspected: D:/tiktok/Fashion-AI was empty; parent contained AGENT_MVP_SPEC.md and one user MP4. Read full specification and attached M0 request. No AGENTS.md found. Parent specification and user video remain untouched. Specification copied into project for reference. Latest task takes precedence: SQLAlchemy/Pydantic, MP4/MOV/MKV, 500 MiB default, stop after M0. Kept configurable 180-second duration limit. Created M0_IMPLEMENTATION_PLAN.md before application code.
@@ -81,3 +89,5 @@ Automated verification includes real four-mode audio-copy exports, rational FPS/
 Final complete suite and publication results are recorded below after the last check. Logical Conventional Commits separate typography/masks, persistence/export, Studio, tests/CI and docs. Pre-publication audit81 source/config/docs paths: zero forbidden data/model/media/runtime artifacts, zero common credential patterns, zero file over1MiB. Ignore probes cover .env/SQLite/source video/models/screenshots. No force push, merge, tag/release, branch deletion or M3 authorized/performed. See M2_TEST_REPORT.md for acceptance matrix, exact PowerShell setup/test/run commands and limits (sampled tracking, basic inpaint, normalized VFR, first audio track, inherited disk cache).
 
 Final complete run with both real-model flags and explicit FFmpeg paths: **119 passed in 54.45s**, zero failures/errors/skips. Includes actual cancellation after render worker enters PROCESSING, preserving original and previous completed output. Full report/JUnit counts26+60+1+31+1.
+
+Publication preflight found origin/develop advanced to **c76f4c5abf72a4be4dce673577d780e3102b8df9**, owner merge of Smart Review PR #3 (parents bb4b94a and40a4881). Initial verified M2 head3f15055 was normally pushed; before opening PR, integrated approved develop into M2 feature only. Resolved additive .env/settings conflicts by keeping both review/render fields; migration/review code merged without conflict. No PR was merged by this agent. Reran complete integrated M0/M1/Smart/M2 suite: **138 passed in 58.33s**, zero failures/errors/skips (26+79+1+31+1). Tightened CI gates to79 deterministic M1/Smart and31 M2, preserving26 M0. The earlier119 result records independent M2 verification;138 is the final combined baseline.

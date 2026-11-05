@@ -1,10 +1,10 @@
 # M2 verification — 2026-11-05
 
-Approved baseline: `origin/develop` **bb4b94a510cce6f8eedd4393132fdababf444f48**, merge of M1 PR #2. M2 branch: `feature/m2-text-replacement`. Smart Review remains independent PR #3; its shared migration/edited-approval fix is reused as `6bd5ab6`. No main modification, merge, release, tag or M3.
+Approved baseline: `origin/develop` **bb4b94a510cce6f8eedd4393132fdababf444f48**, merge of M1 PR #2. M2 branch: `feature/m2-text-replacement`. During preflight, owner merged Smart Review PR #3 into develop **c76f4c5abf72a4be4dce673577d780e3102b8df9**. M2 integrated that approved develop into its feature branch and reran everything. Shared migration/edited-approval fix had already been reused as `6bd5ab6`. No main modification, merge, release, tag or M3.
 
 ## Results
 
-Windows, Python 3.11.18, CPU, FFmpeg/FFprobe 9.0.2, pinned requirements-m2.txt. Final complete run: **119 passed in 54.45s**, zero failures/errors/skips. Breakdown: **26 M0 + 60 deterministic M1 + 1 real M1 + 31 deterministic/real-FFmpeg M2 + 1 real M1→M2**. JUnit is local ignored `storage/temp/m2-final-results.xml`.
+Windows, Python 3.11.18, CPU, FFmpeg/FFprobe 9.0.2, pinned requirements-m2.txt. Final complete run: **138 passed in 58.33s**, zero failures/errors/skips. Breakdown: **26 M0 + 79 deterministic M1/Smart Review + 1 real M1 + 31 deterministic/real-FFmpeg M2 + 1 real M1→M2**. JUnit is local ignored `storage/temp/m2-final-results.xml`.
 
 Real complete worker test independently passed in 27.92s; measured M1→M2 portion 24.16s (includes worker startups, OCR, translation, approval, preview, render and cancellation/reopen), output 76,890 bytes. Synthetic original 540×960, 25 FPS, 6 seconds with Chinese text and AAC sine tone. Paddle mobile OCR → Argos offline → approved `Phối đồ nam` → before/after → H.264 MP4 with AAC. FFprobe: **540×960, 6.0s**. Source/output AAC packet SHA256 arrays match exactly; audio packet PTS arrays match within 1/48000 second. Source bytes unchanged. Cancellation after worker enters PROCESSING preserves previous output; reopened DB retains completed history. These are controlled-fixture results, not a performance or quality benchmark.
 
@@ -14,13 +14,13 @@ UI: actual Brave at localhost:8503 using existing isolated synthetic M1 project.
 
 Migration on actual demo DB made `app.pre-v30-b4a7b412.db`; compared against backup: **3 text_segments, 18 ocr_detections, 2 segment_reviews and 2 review_events unchanged**. Versions 1,20,30 coexist. Source rights were then explicitly updated through UI; replacement configuration/history are new separate records. Existing M0/M1 legacy-migration and data-preservation tests pass.
 
-Earlier validation: 25 initial M2 tests passed; first complete run had 115 pass/1 fail because FFmpeg 9 no longer wrote rotation via old metadata option. Fixture now uses input `-display_rotation 90`; rotated output verified. Actual first-use UI found a default integer opacity rejected by Streamlit's float slider; fixed default/coercion and expanded AppTest to cover no saved configuration. Subsequent complete run 118 passed; final 119 adds provider-boundary coverage. No failure was treated as success.
+Earlier validation: 25 initial M2 tests passed; first complete run had 115 pass/1 fail because FFmpeg 9 no longer wrote rotation via old metadata option. Fixture now uses input `-display_rotation 90`; rotated output verified. Actual first-use UI found a default integer opacity rejected by Streamlit's float slider; fixed default/coercion and expanded AppTest to cover no saved configuration. Subsequent complete run 118 passed; 119 adds provider-boundary coverage (54.45s); final integrated 138 includes all 19 Smart Review tests after owner merged PR #3. No failure was treated as success.
 
 ## Acceptance matrix
 
 | Criterion | Status | Evidence / scope |
 |---|---|---|
-| M0/M1 functional | PASS | All 87 existing tests including real models |
+| M0/M1 functional | PASS | All 106 M0/M1/Smart Review tests including real models |
 | Existing approved translations; rejected excluded; pending explicit | PASS | Repository tests and populated Studio |
 | Accurate intended boxes, moving/static/multiple/fractional intervals | PASS | Interpolation/pixel/timeline tests; sparse samples block until reviewed |
 | Selectable removal modes | PASS | Four real FFmpeg exports and Studio selector |
@@ -33,7 +33,7 @@ Earlier validation: 25 initial M2 tests passed; first complete run had 115 pass/
 | Persistent jobs/configuration/reopen | PASS | SQLite E2E, dead-worker recovery, constraints, idempotency tests |
 | Failure/cancel does not corrupt originals/prior outputs | PASS | Cleanup/stale snapshot/cancel tests and real E2E |
 | Windows CPU, no mandatory GPU | PASS | Entire run Windows CPU, local models |
-| All existing/new tests and original synthetic E2E | PASS | 119/119 zero skipped |
+| All existing/new tests and original synthetic E2E | PASS | 138/138 zero skipped |
 | General complex-scene removal quality, optical flow, long-video peak RAM | NOT TESTED | No broad quality/throughput/memory benchmark claimed |
 | Windows 10 specifically / GPU / arbitrary audio codecs | NOT TESTED | Tested current Windows host and AAC; fallback AAC policy implemented |
 

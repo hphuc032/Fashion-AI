@@ -1,5 +1,13 @@
 # Fashion AI Localizer — M0 + M1
 
+## Smart Auto Review (feature branch)
+
+Trong Nhận diện & Dịch, chọn Thủ công (mặc định), Smart Auto Review (khuyên dùng), hoặc Auto Approve All. Smart đánh giá OCR và bản dịch độc lập; chỉ cụm khớp chính xác thuật ngữ đã kiểm chứng mới có đủ bằng chứng để tự duyệt. Câu neural chưa xác định được nghĩa vẫn cần kiểm tra dù OCR=1.000. Điểm là heuristic, không phải xác suất đúng.
+
+Có duyệt các đoạn đã chọn / cả trang (tối đa 100) kèm xác nhận, chuyển về chờ duyệt, lọc cần kiểm tra và số liệu từng nhóm. Đoạn bị loại không tự được duyệt lại; chuyển về chờ duyệt trước. Sửa nội dung đã duyệt sẽ hủy duyệt cũ. Các thao tác có audit, hash nội dung và thời gian; rerun không tự lặp thao tác. Giá/số/kích thước, tên thương hiệu, chữ Trung còn sót, câu lặp, lỗi provider và claim đáng ngờ đều ngăn Smart tự duyệt. Tắt kiểm tra nghĩa không cho phép duyệt chỉ bằng OCR.
+
+Migration review phiên bản 20 chỉ thêm bảng trạng thái/audit, có backup SQLite; trạng thái cũ pending/approved/rejected vẫn được giữ cho M1 và M2. AUTO_APPROVED và MANUALLY_APPROVED cùng ánh xạ approved. Không gọi API ngoài. Cấu hình AUTO_REVIEW_* trong .env.example. Chạy bằng `.\.venv-m1-clean\Scripts\python.exe -m streamlit run app/main.py`; test đầy đủ với M1_RUN_REAL=1. Chi tiết: docs/SMART_AUTO_REVIEW_PLAN.md.
+
 Ứng dụng Windows chạy cục bộ: nhập MP4/MOV/MKV, giữ bản gốc, lưu SQLite, nhận diện chữ Trung bằng PaddleOCR, gom caption, dịch Việt offline và sửa/duyệt từng đoạn. Giao diện tiếng Việt, không cần tài khoản hoặc API trả phí. M0 đã được duyệt/phát hành v0.1.0; M1 nằm trên nhánh feature để review. Chưa xóa chữ, chèn chữ vào video, nhận diện giọng nói, lồng tiếng, phụ đề hay xuất video đã xử lý.
 
 ## Cài đặt (PowerShell)
@@ -120,7 +128,7 @@ Dependencies ghim ở `requirements.txt`; metadata hỗ trợ Python được ki
 
 Kết quả thực tế và các mục chưa kiểm chứng: xem `docs/IMPLEMENTATION_LOG.md` và `docs/M0_ACCEPTANCE.md`.
 
-Quy trình Git: M0 có tag `v0.1.0` trên main. M1 đã được chủ dự án merge qua PR #2 vào approved develop `bb4b94a`. Smart Review (PR #3) và M2 phát triển trên hai nhánh riêng từ baseline này; chỉ push feature và tạo PR, không merge, không đổi main/tag/release và không làm M3.
+Quy trình Git: M0 có tag `v0.1.0` trên main. M1 đã được chủ dự án merge qua PR #2 vào approved develop `bb4b94a`. Smart Review đã được chủ dự án merge qua PR #3 vào develop `c76f4c5`; M2 đã cập nhật baseline này và kiểm chứng chung. Chỉ push nhánh M2 và tạo PR, không merge PR M2, không đổi main/tag/release và không làm M3.
 
 ## Thay chữ và xuất MP4 (M2)
 
@@ -147,4 +155,4 @@ Render chạy worker CPU riêng, tối đa một render toàn DB, có tiến đ�
 
 Các biến `.env.example`: `RENDER_TIMEOUT_SECONDS=1800`, `RENDER_MAX_FRAMES=12000`, `RENDER_MAX_FPS=60`, `PREVIEW_CACHE_ENTRIES=12`; cap pixel/thời lượng nguồn dùng cấu hình M1/M0. Cache PNG preview giới hạn; frame cache M1/log/video xuất có thể tích lũy trên đĩa. Migration additive version30 tạo bản SQLite `*.pre-v30-*.db`, giữ bảng M0/M1 và tương thích review schema20, không xóa DB.
 
-Kiểm chứng Windows CPU: **119 test pass**, gồm toàn bộ M0/M1 và M2, OCR→dịch→xuất thật, AAC packet/timestamp, VFR, FPS phân số và hướng xoay. Chạy deterministic M2: `python -m pytest tests/test_m2.py -q`. Để chạy đầy đủ model thật, bật `M1_RUN_REAL=1`, `M2_RUN_REAL=1` rồi `python -m pytest -q --tb=short`; xem lệnh PowerShell, acceptance matrix và giới hạn ở [M2_TEST_REPORT.md](docs/M2_TEST_REPORT.md).
+Kiểm chứng Windows CPU: **138 test pass**, gồm toàn bộ M0/M1 và M2, OCR→dịch→xuất thật, AAC packet/timestamp, VFR, FPS phân số và hướng xoay. Chạy deterministic M2: `python -m pytest tests/test_m2.py -q`. Để chạy đầy đủ model thật, bật `M1_RUN_REAL=1`, `M2_RUN_REAL=1` rồi `python -m pytest -q --tb=short`; xem lệnh PowerShell, acceptance matrix và giới hạn ở [M2_TEST_REPORT.md](docs/M2_TEST_REPORT.md).

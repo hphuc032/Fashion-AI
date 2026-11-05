@@ -69,7 +69,7 @@ jobs:
           totals = {key: sum(int(s.get(key, 0)) for s in suites)
                     for key in ('tests', 'failures', 'errors', 'skipped')}
           print(totals)
-          assert totals['tests'] >= 60 and totals['failures'] == totals['errors'] == totals['skipped'] == 0, totals
+          assert totals['tests'] >= 79 and totals['failures'] == totals['errors'] == totals['skipped'] == 0, totals
           PY
 
   m2-tests:
@@ -97,5 +97,5 @@ jobs:
           totals = {key: sum(int(s.get(key, 0)) for s in suites)
                     for key in ('tests', 'failures', 'errors', 'skipped')}
           print(totals)
-          assert totals['tests'] >= 25 and totals['failures'] == totals['errors'] == totals['skipped'] == 0, totals
+          assert totals['tests'] >= 31 and totals['failures'] == totals['errors'] == totals['skipped'] == 0, totals
           PY

@@ -1,5 +1,7 @@
 # M2 text replacement plan
 
+Publication update: while M2 was being verified, owner merged Smart Review PR #3 into develop `c76f4c5`. Before opening M2 PR, integrate that approved baseline into the feature branch with a normal merge (no force push), retaining both feature settings. Rerun all suites together. Initial plan/baseline history below remains the record of development order.
+
 Baseline: fetched approved develop bb4b94a (owner merged M1). feature/m2-text-replacement starts there. Shared low-level migration registry/edited-approval safety commit reused as 6bd5ab6, without merging Smart Review PR #3. M2 accepts existing legacy approved mapping, so AUTO_APPROVED/MANUALLY_APPROVED are compatible when Smart Review is integrated later. No duplicate OCR/translation implementation, main/tag/merge/M3.
 
 Pipeline: persisted M1 segments/detections → separate replacement configuration → conservative time-varying boxes → solid/blur/OpenCV inpaint/overlay-only compositor → Pillow Unicode layout → streaming FFmpeg H.264/AAC-or-audio-copy output → FFprobe validation → atomic artifact publication. CPU, one render job, originals untouched.
