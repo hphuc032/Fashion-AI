@@ -86,6 +86,8 @@ def save_reviews(sessions, project_id: str, edits: list[dict]) -> None:
                 if not (0 <= x < width and 0 <= y < height and w > 0 and h > 0 and x + w <= width and y + h <= height):
                     raise UserError("Khung chữ phải nằm bên trong kích thước video gốc.")
                 if translated != segment.translated_text or source != segment.source_text:
+                    if segment.review_status == "approved":
+                        status = "pending"
                     segment.translation_provider = "manual"
                     segment.translation_error = None
                 segment.source_text, segment.translated_text = source, translated
