@@ -1,5 +1,13 @@
 # Implementation log
 
+## 2026-11-05 — Smart Auto Review
+
+Owner confirmed M1 merged; fetched origin/develop bb4b94a and verified cf95ca5 is its ancestor. Baseline M0/M1 actual-model suite: 87 passed in 25.07s. Created feature/smart-auto-review from approved develop; plan before code. Added generic additive schema discovery (M1=1, review=20, reserved render=30), pre-upgrade SQLite backups and a shared stale-approval edit fix. No main or develop mutation beyond local fast-forward synchronization.
+
+Review service checks OCR, source/translation, length, CJK residue, numeric/price/size/brand consistency, duplicate language, claims and provider errors. Only exact curated terminology plus all checks can auto-approve; unknown semantic quality stays pending. No external API. Legacy approved mapping retained. Separate state/audit records hash/mode/method/score/reasons/timestamp; current state cascades on OCR replacement, history retained. Batch cap 100, confirmation before all/selected approval, rejected protection, optimistic revisions and no-op write protection. Editor changes invalidate old approval; existing manual workflow remains.
+
+Expanded suite: 106 passed in 24.91s with actual OCR/Argos integration; final post-review run reported at handoff. Actual Brave UI verified two curated phrases auto-approved in one batch, one existing manual approval unchanged, score/reason display; screenshot local/ignored. Demo DB migration backed up and retained prior results. Smart/M2 remain separate feature PRs; shared low-level fixes can be reused without merging either PR. No tags/releases/M3.
+
 ## 2026-11-05 — M0 only (Asia/Saigon)
 
 Repository inspected: D:/tiktok/Fashion-AI was empty; parent contained AGENT_MVP_SPEC.md and one user MP4. Read full specification and attached M0 request. No AGENTS.md found. Parent specification and user video remain untouched. Specification copied into project for reference. Latest task takes precedence: SQLAlchemy/Pydantic, MP4/MOV/MKV, 500 MiB default, stop after M0. Kept configurable 180-second duration limit. Created M0_IMPLEMENTATION_PLAN.md before application code.

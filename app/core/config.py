@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 
 from dotenv import load_dotenv
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 from sqlalchemy.engine import make_url
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -35,6 +35,17 @@ class Settings(BaseModel):
     translation_retries: int = Field(default=2, ge=0, le=4)
     translation_max_characters: int = Field(default=10000, ge=100, le=100000)
     argos_models_dir: Path | None = None
+    auto_review_enabled: bool = True
+    auto_review_ocr_high_threshold: float = Field(default=.95, ge=0, le=1)
+    auto_review_ocr_low_threshold: float = Field(default=.80, ge=0, le=1)
+    auto_review_max_batch_size: int = Field(default=100, ge=1, le=100)
+    auto_review_require_translation_check: bool = True
+
+    @model_validator(mode="after")
+    def review_thresholds(self):
+        if self.auto_review_ocr_low_threshold > self.auto_review_ocr_high_threshold:
+            raise ValueError("Ngưỡng OCR thấp phải nhỏ hơn ngưỡng cao.")
+        return self
 
     @property
     def max_bytes(self) -> int:

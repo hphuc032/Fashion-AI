@@ -1,5 +1,13 @@
 # Fashion AI Localizer — M0 + M1
 
+## Smart Auto Review (feature branch)
+
+Trong Nhận diện & Dịch, chọn Thủ công (mặc định), Smart Auto Review (khuyên dùng), hoặc Auto Approve All. Smart đánh giá OCR và bản dịch độc lập; chỉ cụm khớp chính xác thuật ngữ đã kiểm chứng mới có đủ bằng chứng để tự duyệt. Câu neural chưa xác định được nghĩa vẫn cần kiểm tra dù OCR=1.000. Điểm là heuristic, không phải xác suất đúng.
+
+Có duyệt các đoạn đã chọn / cả trang (tối đa 100) kèm xác nhận, chuyển về chờ duyệt, lọc cần kiểm tra và số liệu từng nhóm. Đoạn bị loại không tự được duyệt lại; chuyển về chờ duyệt trước. Sửa nội dung đã duyệt sẽ hủy duyệt cũ. Các thao tác có audit, hash nội dung và thời gian; rerun không tự lặp thao tác. Giá/số/kích thước, tên thương hiệu, chữ Trung còn sót, câu lặp, lỗi provider và claim đáng ngờ đều ngăn Smart tự duyệt. Tắt kiểm tra nghĩa không cho phép duyệt chỉ bằng OCR.
+
+Migration review phiên bản 20 chỉ thêm bảng trạng thái/audit, có backup SQLite; trạng thái cũ pending/approved/rejected vẫn được giữ cho M1 và M2. AUTO_APPROVED và MANUALLY_APPROVED cùng ánh xạ approved. Không gọi API ngoài. Cấu hình AUTO_REVIEW_* trong .env.example. Chạy bằng `.\.venv-m1-clean\Scripts\python.exe -m streamlit run app/main.py`; test đầy đủ với M1_RUN_REAL=1. Chi tiết: docs/SMART_AUTO_REVIEW_PLAN.md.
+
 Ứng dụng Windows chạy cục bộ: nhập MP4/MOV/MKV, giữ bản gốc, lưu SQLite, nhận diện chữ Trung bằng PaddleOCR, gom caption, dịch Việt offline và sửa/duyệt từng đoạn. Giao diện tiếng Việt, không cần tài khoản hoặc API trả phí. M0 đã được duyệt/phát hành v0.1.0; M1 nằm trên nhánh feature để review. Chưa xóa chữ, chèn chữ vào video, nhận diện giọng nói, lồng tiếng, phụ đề hay xuất video đã xử lý.
 
 ## Cài đặt (PowerShell)

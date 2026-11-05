@@ -68,6 +68,7 @@ def save_reviews(sessions, project_id: str, edits: list[dict]) -> None:
                 seen.add(segment_id)
                 if segment.revision != int(edit["revision"]):
                     raise UserError("Kết quả đã thay đổi ở cửa sổ/tác vụ khác. Tải lại rồi sửa lại để tránh ghi đè.")
+                before = (segment.source_text, segment.translated_text, segment.start_time, segment.end_time, segment.bounding_box, segment.review_status)
                 status = edit.get("review_status", segment.review_status)
                 translated = str(edit.get("translated_text", segment.translated_text)).strip()
                 source = str(edit.get("source_text", segment.source_text)).strip()
@@ -86,12 +87,18 @@ def save_reviews(sessions, project_id: str, edits: list[dict]) -> None:
                 if not (0 <= x < width and 0 <= y < height and w > 0 and h > 0 and x + w <= width and y + h <= height):
                     raise UserError("Khung chữ phải nằm bên trong kích thước video gốc.")
                 if translated != segment.translated_text or source != segment.source_text:
+                    if segment.review_status == "approved":
+                        status = "pending"
                     segment.translation_provider = "manual"
                     segment.translation_error = None
                 segment.source_text, segment.translated_text = source, translated
                 segment.start_time, segment.end_time = start, end
                 segment.bounding_box = [int(v) for v in box]
                 segment.review_status = status
+                if before == (source, translated, start, end, segment.bounding_box, status):
+                    continue
+                from app.services.translation_review_service import record_editor_action
+                record_editor_action(session, segment)
                 segment.revision += 1
             session.commit()
         except Exception:
