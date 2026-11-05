@@ -5,7 +5,7 @@ import time
 from dataclasses import asdict
 from uuid import uuid4
 
-from sqlalchemy import delete, select, update
+from sqlalchemy import delete, select, update, inspect, text
 from sqlalchemy.exc import IntegrityError
 
 from app.core.config import Settings
@@ -48,8 +48,14 @@ def queue_job(sessions, settings: Settings, project_id: str, kind="ocr", selecte
                  config={"settings": settings.model_dump(mode="json"), "selected_ids": ids,
                          "replace_existing": replace_existing}, lease_expires=time.time() + settings.job_timeout_seconds)
     try:
-        with sessions.begin() as session:
+        with sessions() as session:
+            session.connection().exec_driver_sql('BEGIN IMMEDIATE')
+            # Optional M2 schema: serialize both queues without coupling M1 to M2.
+            if inspect(session.bind).has_table('render_jobs') and session.execute(
+                    text("SELECT id FROM render_jobs WHERE status IN ('QUEUED','PROCESSING') LIMIT 1")).first():
+                raise UserError('Chờ render hoàn tất hoặc hủy trước khi chạy OCR/dịch.')
             session.add(job)
+            session.commit()
     except IntegrityError as exc:
         raise UserError("Đang có một tác vụ OCR/dịch khác. Chờ hoàn tất hoặc hủy trước khi chạy tiếp.") from exc
     return job

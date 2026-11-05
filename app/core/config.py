@@ -35,6 +35,10 @@ class Settings(BaseModel):
     translation_retries: int = Field(default=2, ge=0, le=4)
     translation_max_characters: int = Field(default=10000, ge=100, le=100000)
     argos_models_dir: Path | None = None
+    render_timeout_seconds: int = Field(default=1800,ge=30,le=7200)
+    render_max_frames: int = Field(default=12000,ge=1,le=100000)
+    render_max_fps: int = Field(default=60,ge=1,le=240)
+    preview_cache_entries: int = Field(default=12,ge=1,le=100)
     auto_review_enabled: bool = True
     auto_review_ocr_high_threshold: float = Field(default=.95, ge=0, le=1)
     auto_review_ocr_low_threshold: float = Field(default=.80, ge=0, le=1)

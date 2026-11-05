@@ -128,4 +128,31 @@ Dependencies ghim ở `requirements.txt`; metadata hỗ trợ Python được ki
 
 Kết quả thực tế và các mục chưa kiểm chứng: xem `docs/IMPLEMENTATION_LOG.md` và `docs/M0_ACCEPTANCE.md`.
 
-Quy trình Git: M0 đã có tag `v0.1.0` trên main. M1 phát triển từ approved develop `806c114` trên `feature/m1-ocr-translation`; được phép push và tạo PR vào develop sau kiểm chứng. Không merge, không đổi main, không tạo tag `v0.2.0` và không làm M2 khi chưa được cho phép.
+Quy trình Git: M0 có tag `v0.1.0` trên main. M1 đã được chủ dự án merge qua PR #2 vào approved develop `bb4b94a`. Smart Review đã được chủ dự án merge qua PR #3 vào develop `c76f4c5`; M2 đã cập nhật baseline này và kiểm chứng chung. Chỉ push nhánh M2 và tạo PR, không merge PR M2, không đổi main/tag/release và không làm M3.
+
+## Thay chữ và xuất MP4 (M2)
+
+Cài Python 3.11, FFmpeg/FFprobe có libx264, và dependencies M2:
+
+```powershell
+py -3.11 -m venv .venv-m2
+.\.venv-m2\Scripts\python.exe -m pip install -r requirements-m2.txt
+# Dùng .env hiện có; máy mới sao chép .env.example và đặt đường dẫn FFmpeg.
+.\.venv-m2\Scripts\python.exe -m streamlit run app/main.py --server.address 127.0.0.1
+```
+
+M2 dùng lại dữ liệu OCR/dịch M1, không cần model inpainting mới. Muốn chạy OCR/dịch trên máy mới, cài hai bộ model theo hướng dẫn M1. Mở **Text Replacement Studio**, chọn dự án và đoạn đã duyệt, bật đoạn cần xuất và lưu cấu hình riêng. Các đoạn chưa cấu hình giữ nguyên; rejected luôn bị bỏ qua; pending chỉ được dùng khi chủ động chọn sau kiểm tra. Sửa chữ đã approved ở trang M1 sẽ đưa về pending, không giữ duyệt cũ.
+
+Chọn **A · Mask màu / Làm mờ**, **B · OpenCV inpaint**, hoặc **C · Chỉ chèn chữ**. Có thể chỉnh khung gốc, khung chữ riêng, khoảng hiện/ẩn, font/cỡ/màu/viền/bóng/nền/căn dòng/giãn dòng/lề an toàn, padding và opacity. Bản sửa nội dung riêng cho render cần xác nhận đã kiểm tra. Không sửa OCR/bản dịch M1 khi lưu style. Chữ tự xuống dòng và giảm cỡ để vừa khung, không tự cắt nội dung; lỗi glyph, khung quá nhỏ hoặc hai bản dịch đè nhau yêu cầu chỉnh tay.
+
+Font hệ thống Arial/Segoe UI trên Windows hoặc DejaVu Sans; không kèm font có bản quyền trong Git. Glyph tiếng Việt được kiểm tra bằng FontTools trước khi vẽ. Font mặc định trắng, viền đen, căn giữa; cỡ tự giảm theo khung. Khung gốc theo hướng hiển thị của video; tracking nội suy các detection M1 liền kề. Mẫu thưa/điểm thấp phải xem trước, chỉnh khung cố định hoặc xác nhận; không coi một khung đại diện là tracking chính xác mọi cảnh.
+
+Nhấn **Xem frame trước / sau** sau khi lưu. Preview chỉ giải mã frame đã chọn và dùng cùng compositor với xuất video. Inpaint cơ bản có thể làm nhòe/vệt nền chuyển động hoặc phức tạp; xem kỹ các mốc cảnh. Tool chỉ dùng cho caption được phép thay. Xác nhận quyền video/âm thanh và vùng caption, cập nhật quyền nguồn hợp lệ trước **Render MP4**; dự án unknown bị chặn. Không có phát hiện/xóa watermark hay công cụ che attribution chuyên biệt.
+
+Render chạy worker CPU riêng, tối đa một render toàn DB, có tiến độ/hủy/lịch sử SQLite. OCR/dịch và render không chạy chồng nhau. Rerun UI không khởi động lại job đang chạy; nạp lịch sử sau khi hoàn tất để xem/tải MP4. File ở `storage/projects/<project-id>/exports/`, UUID riêng cho mỗi lần; partial chỉ đổi tên sau FFprobe validation và kiểm tra nội dung duyệt không đổi. Lỗi/hủy không xóa bản gốc hoặc lần xuất trước.
+
+Đầu ra H.264/yuv420p giữ kích thước hiển thị chẵn, tỷ lệ và FPS phân số. VFR được chuẩn hóa về average FPS hữu tỉ, giữ timeline trong sai số tối đa 0.12 giây hoặc 2 frame; không giữ cadence VFR gốc. Âm thanh đầu tiên AAC/MP3/ALAC được copy, codec khác chuyển AAC; không xuất các audio/subtitle track phụ. Không xử lý ASR/TTS/dubbing. Pipeline stream từng frame, không giữ cả video raw trong RAM.
+
+Các biến `.env.example`: `RENDER_TIMEOUT_SECONDS=1800`, `RENDER_MAX_FRAMES=12000`, `RENDER_MAX_FPS=60`, `PREVIEW_CACHE_ENTRIES=12`; cap pixel/thời lượng nguồn dùng cấu hình M1/M0. Cache PNG preview giới hạn; frame cache M1/log/video xuất có thể tích lũy trên đĩa. Migration additive version30 tạo bản SQLite `*.pre-v30-*.db`, giữ bảng M0/M1 và tương thích review schema20, không xóa DB.
+
+Kiểm chứng Windows CPU: **138 test pass**, gồm toàn bộ M0/M1 và M2, OCR→dịch→xuất thật, AAC packet/timestamp, VFR, FPS phân số và hướng xoay. Chạy deterministic M2: `python -m pytest tests/test_m2.py -q`. Để chạy đầy đủ model thật, bật `M1_RUN_REAL=1`, `M2_RUN_REAL=1` rồi `python -m pytest -q --tb=short`; xem lệnh PowerShell, acceptance matrix và giới hạn ở [M2_TEST_REPORT.md](docs/M2_TEST_REPORT.md).
