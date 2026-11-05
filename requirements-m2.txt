@@ -1,0 +1,2 @@
+-r requirements-m1.txt
+fonttools==4.63.0
