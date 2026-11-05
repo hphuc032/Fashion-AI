@@ -97,7 +97,9 @@ def ocr_page(settings, sessions):
     if st.button("Tải lại kết quả"):
         st.rerun()
     try:
-        selected = translation_editor(sessions, project_id, busy=busy)
+        if st.session_state.get(f"review_notice_{project_id}"):
+            st.success(st.session_state.pop(f"review_notice_{project_id}"))
+        selected = translation_editor(sessions, project_id, busy=busy, settings=options)
         if selected:
             job = queue_job(sessions, options, project_id, kind="translate", selected_ids=selected)
             supervisor.launch(job)
