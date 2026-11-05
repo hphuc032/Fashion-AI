@@ -139,3 +139,7 @@ Actual Brave localhost8504 completed ASR/selected Argos/manual edit+approval/voi
 - `scripts/setup_m3_models.py`
 - `tests/test_m3.py`
 - `tests/test_m3_real.py`
+
+## Publication
+
+[Feature branch](https://github.com/hphuc032/Fashion-AI/tree/feature/m3-ai-dubbing), open/unmerged [PR #5 → develop](https://github.com/hphuc032/Fashion-AI/pull/5). Verified implementation head2deaa27, commits76a9ab6/c8e372b/3036308/24a2f00/8f0e306/3922052/2deaa27; final docs-only publication SHA and latest hosted check results in handoff/PR. Normal pushes only; main/tag unchanged, no M4.
