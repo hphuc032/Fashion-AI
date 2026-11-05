@@ -24,6 +24,8 @@ Real fixture: 6 seconds, 540×960, 25 fps, synthetic Chinese captions → 18 raw
 
 Actual Brave verification: upload, OCR progress, translation selection, manual correction/approval, reload persistence, diagnostic boxes. Screenshots/models/fixtures/databases remain ignored locally. Detailed evidence: docs/M1_TEST_REPORT.md and docs/IMPLEMENTATION_LOG.md. CI runs original M0 gate and deterministic M1 suite without model downloads; hosted results will be reported after this push.
 
+Hosted PR checks on aac14d6 passed: [run 41970476863](https://github.com/hphuc032/Fashion-AI/actions/runs/41970476863), both m0-tests and m1-tests with no-skip count gates. PR #2 remains open for owner review. The final documentation-only handoff commit does not alter the verified application, tests or CI definition.
+
 ## Acceptance and limitations
 
 - [x] M0 regression suite remains green; select/upload existing projects.

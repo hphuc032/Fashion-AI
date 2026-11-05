@@ -87,3 +87,7 @@ Argos pivot quality is variable: 这件衬衫很舒服 produced **Áo đẹp đ�
 Sampling timestamps identify requested source positions with interval-level accuracy; not exact per-frame PTS or full temporal tracking. Moving/obscured captions may split/miss; tune interval and edit. Low-confidence raw text remains available; empty OCR is a valid result. Frames are cached but caches can accumulate on disk. Deadline/lease ends orphan/dead jobs; retry requires explicit action. Single local trusted user, no cloud deployment. No Chinese text removal, overlays in output video, ASR/dubbing/subtitles/render/export/M2.
 
 Functionality is verified in the scope above and ready for owner review; owner M1 acceptance, integration and v0.2.0 remain pending. GitHub PR/branch URLs and exact final commits are reported in handoff after publication.
+
+## Published feature / hosted checks
+
+Branch: https://github.com/hphuc032/Fashion-AI/tree/feature/m1-ocr-translation. Review PR: https://github.com/hphuc032/Fashion-AI/pull/2 (base develop; open, unmerged). Hosted run https://github.com/hphuc032/Fashion-AI/actions/runs/41970476863 on aac14d6 passed both m0-tests and m1-tests, including explicit no-skip count gates. Model E2E remains local-only; CI does not claim real OCR accuracy. Final documentation-only handoff commit preserves all tested application/test/CI files. No force-push/main change/merge/tag/M2.
