@@ -19,6 +19,22 @@ class Settings(BaseModel):
     ffmpeg_path: str = "ffmpeg"
     ffprobe_path: str = "ffprobe"
     log_level: str = "INFO"
+    ocr_sample_interval_seconds: float = Field(default=1.0, ge=0.1, le=60, allow_inf_nan=False)
+    ocr_max_frames: int = Field(default=300, ge=1, le=1000)
+    ocr_max_side: int = Field(default=1280, ge=320, le=1920)
+    ocr_max_source_pixels: int = Field(default=16777216, ge=1000000, le=64000000)
+    ocr_enable_gpu: bool = False
+    ocr_cpu_threads: int = Field(default=2, ge=1, le=8)
+    ocr_min_confidence: float = Field(default=0.4, ge=0, le=1, allow_inf_nan=False)
+    ocr_similarity_threshold: float = Field(default=0.94, ge=0.8, le=1, allow_inf_nan=False)
+    ocr_iou_threshold: float = Field(default=0.3, gt=0, le=1, allow_inf_nan=False)
+    ocr_models_dir: Path | None = None
+    job_timeout_seconds: int = Field(default=1800, ge=30, le=7200)
+    translation_provider: str = "manual"
+    translation_timeout_seconds: int = Field(default=60, ge=1, le=300)
+    translation_retries: int = Field(default=2, ge=0, le=4)
+    translation_max_characters: int = Field(default=10000, ge=100, le=100000)
+    argos_models_dir: Path | None = None
 
     @property
     def max_bytes(self) -> int:
@@ -29,8 +45,13 @@ def load_settings() -> Settings:
     load_dotenv(ROOT / ".env", override=False)
     values = {key: os.environ[key.upper()] for key in Settings.model_fields
               if key.upper() in os.environ}
+    for key in ("ocr_models_dir", "argos_models_dir"):
+        if not values.get(key):
+            values.pop(key, None)
     settings = Settings(**values)
     settings.storage_root = (ROOT / settings.storage_root).resolve()
+    settings.ocr_models_dir = (ROOT / settings.ocr_models_dir).resolve() if settings.ocr_models_dir else settings.storage_root / "models" / "paddle"
+    settings.argos_models_dir = (ROOT / settings.argos_models_dir).resolve() if settings.argos_models_dir else settings.storage_root / "models" / "argos"
     for key in ("ffmpeg_path", "ffprobe_path"):
         value = getattr(settings, key)
         if "/" in value or "\\" in value:

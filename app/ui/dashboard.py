@@ -14,16 +14,20 @@ log = logging.getLogger("fashion_ai.ui")
 
 def dashboard(settings: Settings, sessions: sessionmaker) -> None:
     st.title(settings.app_name)
-    st.caption("Không gian video của bạn · Nền tảng M0")
-    page = st.sidebar.radio("Điều hướng", ["Tổng quan", "Tải video", "Thư viện"])
+    st.caption("Không gian video của bạn · Nhập video, OCR và bản dịch")
+    page = st.sidebar.radio("Điều hướng", ["Tổng quan", "Tải video", "Thư viện", "Nhận diện & Dịch"])
     st.sidebar.caption("Chạy cục bộ • Không sử dụng API trả phí")
+    if page == "Nhận diện & Dịch":
+        from app.ui.ocr_page import ocr_page
+        ocr_page(settings, sessions)
+        return
     projects = list_projects(sessions)
     if page == "Tổng quan":
         a, b, c = st.columns(3)
         a.metric("Video đã nhập", len(projects))
         b.metric("Dung lượng đã nhập", f"{sum(p.file_size for p in projects) / 1024**2:.1f} MB")
         c.metric("Thời lượng", f"{sum(p.duration for p in projects):.0f} giây")
-        st.info("M0: tải video, kiểm tra thông tin và xem bản gốc. Các bước AI sẽ được bổ sung ở mốc tiếp theo.")
+        st.info("Tải video, xem bản gốc và nhận diện chữ Trung ở mục Nhận diện & Dịch. Mọi bản dịch cần được kiểm tra và duyệt.")
     if page == "Tải video":
         st.subheader("Nhập video mới")
         st.caption(f"MP4 / MOV / MKV · Tối đa {settings.max_upload_size_mb} MB và {settings.max_video_seconds:g} giây")

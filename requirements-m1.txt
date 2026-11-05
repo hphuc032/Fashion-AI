@@ -1,0 +1,14 @@
+-r requirements.txt
+# M1 CPU image processing and mobile Chinese OCR; no GPU/CUDA package.
+numpy==1.26.4
+# PyArrow 26 requires NumPy >=2; pin the compatible UI table stack for Paddle CPU.
+pyarrow==19.0.1
+pandas==3.0.6
+opencv-contrib-python==4.10.0.84
+paddlepaddle==3.2.2
+paddleocr==3.3.2
+paddlex[ocr-core]==3.3.13
+# Run the two Argos packages directly; avoid spaCy/Stanza/Torch and implicit downloads.
+ctranslate2==4.8.5
+sentencepiece==0.2.2
+psutil==7.2.2

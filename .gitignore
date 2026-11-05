@@ -77,6 +77,10 @@ checkpoints/
 *.bin
 *.pdparams
 *.pdiparams
+*.argosmodel
+frames/
+ocr_cache/
+*.junit.xml
 
 # Logs, binary downloads and editor/OS files
 logs/
