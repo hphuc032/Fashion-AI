@@ -50,6 +50,8 @@ def queue_job(sessions, settings: Settings, project_id: str, kind="ocr", selecte
     try:
         with sessions() as session:
             session.connection().exec_driver_sql('BEGIN IMMEDIATE')
+            from app.services.workload_guard import ensure_idle
+            ensure_idle(session,exclude='ocr_jobs')
             # Optional M2 schema: serialize both queues without coupling M1 to M2.
             if inspect(session.bind).has_table('render_jobs') and session.execute(
                     text("SELECT id FROM render_jobs WHERE status IN ('QUEUED','PROCESSING') LIMIT 1")).first():

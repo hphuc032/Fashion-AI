@@ -50,10 +50,11 @@ def timed_call(callback, timeout: float):
 
 
 class TranslationService:
-    def __init__(self, settings, sessions, provider=None, sleep=time.sleep, call=timed_call):
+    def __init__(self, settings, sessions, provider=None, sleep=time.sleep, call=timed_call, context=CONTEXT):
         self.settings, self.sessions = settings, sessions
         self.provider = provider if provider is not None else make_provider(settings)
         self.sleep, self.call = sleep, call
+        self.context = context
 
     def translate(self, text: str, check_cancel=lambda: None) -> tuple[str, str]:
         text = normalized(text)
@@ -62,7 +63,7 @@ class TranslationService:
         if len(text) > 1000:
             raise UserError("Đoạn quá dài; hãy dịch thủ công.")
         identity = self.provider.identity
-        key = hashlib.sha256(json.dumps([identity, "zh", "vi", text, CONTEXT], ensure_ascii=False).encode()).hexdigest()
+        key = hashlib.sha256(json.dumps([identity, "zh", "vi", text, self.context], ensure_ascii=False).encode()).hexdigest()
         with self.sessions() as session:
             cached = session.get(TranslationCache, key)
             if cached:
@@ -70,7 +71,7 @@ class TranslationService:
         for attempt in range(self.settings.translation_retries + 1):
             check_cancel()
             try:
-                translated = self.call(lambda: self.provider.translate(text, CONTEXT), self.settings.translation_timeout_seconds)
+                translated = self.call(lambda: self.provider.translate(text, self.context), self.settings.translation_timeout_seconds)
                 if not isinstance(translated, str) or not translated.strip():
                     raise ValueError("empty translation")
                 translated = translated.strip()
