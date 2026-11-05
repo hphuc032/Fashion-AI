@@ -5,7 +5,7 @@ from sqlalchemy import create_engine, event
 from sqlalchemy.engine import make_url
 from sqlalchemy.orm import sessionmaker
 
-from app.database.models import Base
+from app.database.migrations import migrate
 
 log = logging.getLogger("fashion_ai.database")
 
@@ -21,6 +21,6 @@ def create_database(url: str) -> sessionmaker:
         connection.execute("PRAGMA foreign_keys=ON")
         connection.execute("PRAGMA journal_mode=WAL")
 
-    Base.metadata.create_all(engine)
+    migrate(engine)
     log.info("database_initialized")
     return sessionmaker(engine, expire_on_commit=False)
