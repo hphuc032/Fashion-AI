@@ -1,4 +1,28 @@
-# Fashion AI Localizer — M0 + M1
+# Fashion AI Localizer — M0–M4
+
+## M4 — Final Export Studio
+
+M4 nối video M2 đã hoàn tất với WAV/lời nói Việt M3 đã duyệt, tạo ASS UTF-8 và MP4 H.264/AAC. Chọn **Final Export Studio**, áp dụng cấu hình, tạo/xem preview, xác nhận quyền nguồn và kiểm tra sync rồi xuất cuối. Không chạy lại OCR, dịch hay TTS. Thiếu artifact hoặc bản duyệt thay đổi sẽ chặn xuất.
+
+Burn-in libass là mặc định. Soft MP4 dùng `mov_text` sau xác nhận tương thích và giữ ASS sidecar; không giữ mọi style/position ASS trên mọi trình phát. Có chế độ tắt phụ đề. Font hệ thống Arial/Segoe UI/DejaVu Sans được dò và kiểm tra glyph; không phân phối font Windows. Có màu/outline/shadow/background, tối đa hai dòng, speaker style, safe margin, vị trí và khoảng dòng. Timestamp theo M3, độ chính xác ASS tới centisecond.
+
+Preserve Original giữ kích thước/FPS; TikTok mặc định1080×1920 với padding, crop cần xác nhận; Compact chỉ dành preview. Fast/Balanced/High dùng libx264 CRF26/21/18 và preset veryfast/fast/medium. CRF thấp thường lớn/chất lượng cao hơn; preset chậm tốn CPU hơn. Soft/tắt phụ đề có thể copy video nếu không đổi hình học/FPS/range. Voice Việt là nguồn audio mặc định; background chỉ bật khi có track tách riêng cùng provenance hợp lệ, không trộn thoại Trung gốc.
+
+Job lưu SQLite, chạy tuần tự, có hủy/phục hồi worker; xuất vào thư mục UUID mới. Thư viện cho xem/tải MP4/ASS/report, dùng lại cấu hình và chuyển bản xuất vào thùng rác có khôi phục. Không xóa upload/artifact M2/M3. Video được kiểm tra FFprobe, decode toàn bộ, waveform và khung hình đại diện trước công bố.
+
+```powershell
+Set-Location 'D:\tiktok\Fashion-AI'
+py -3.11 -m venv .venv-m4
+.\.venv-m4\Scripts\python.exe -m pip install -r requirements-m4.txt
+# Máy mới: Copy-Item .env.example .env; không ghi đè .env đang dùng.
+# Cài FFmpeg/FFprobe có libx264, AAC, libass; đặt PATH hoặc FFMPEG_PATH/FFPROBE_PATH trong .env.
+ffmpeg -hide_banner -filters | Select-String 'ass|subtitles'
+ffmpeg -hide_banner -encoders | Select-String 'libx264|libopenh264|aac|mov_text'
+.\.venv-m4\Scripts\python.exe -m streamlit run app/main.py
+.\.venv-m4\Scripts\python.exe -m pytest tests/test_m4.py -q
+```
+
+Các model M1/M3 chỉ cần để tạo artifact trước M4 hoặc chạy E2E thật, không tải lúc khởi động. Hướng dẫn model, test đầy đủ, kết quả, giới hạn và 18 tiêu chí: [M4 test report](docs/M4_TEST_REPORT.md); thiết kế: [M4 plan](docs/M4_IMPLEMENTATION_PLAN.md). M4 đang chờ review trên feature branch, chưa merge/phát hành v1.0.0.
 
 ## Smart Auto Review (feature branch)
 
