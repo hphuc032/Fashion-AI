@@ -8,6 +8,7 @@ from app.core.config import Settings
 from app.services.storage_service import import_video, list_projects
 from app.ui.components import RIGHTS, project_preview
 from app.utils.validators import UserError, validate_source
+from app.version import __version__
 
 log = logging.getLogger("fashion_ai.ui")
 
@@ -16,7 +17,7 @@ def dashboard(settings: Settings, sessions: sessionmaker) -> None:
     st.title(settings.app_name)
     st.caption("Không gian video của bạn · Nhập video, OCR và bản dịch")
     page = st.sidebar.radio("Điều hướng", ["Tổng quan", "Tải video", "Thư viện", "Nhận diện & Dịch", "Text Replacement Studio", "AI Dubbing Studio", "Final Export Studio"])
-    st.sidebar.caption("Chạy cục bộ • Cloud chỉ khi chủ động chọn")
+    st.sidebar.caption(f"v{__version__} • Chạy cục bộ • Cloud chỉ khi chủ động chọn")
     if page == 'Final Export Studio':
         from app.ui.final_export_studio import final_export_studio
         final_export_studio(settings,sessions)

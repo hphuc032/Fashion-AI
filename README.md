@@ -1,4 +1,4 @@
-# Fashion AI Localizer — M0–M4
+# Fashion AI Localizer v1.0.0 — M0–M4
 
 ## M4 — Final Export Studio
 
@@ -22,9 +22,9 @@ ffmpeg -hide_banner -encoders | Select-String 'libx264|libopenh264|aac|mov_text'
 .\.venv-m4\Scripts\python.exe -m pytest tests/test_m4.py -q
 ```
 
-Các model M1/M3 chỉ cần để tạo artifact trước M4 hoặc chạy E2E thật, không tải lúc khởi động. Hướng dẫn model, test đầy đủ, kết quả, giới hạn và 18 tiêu chí: [M4 test report](docs/M4_TEST_REPORT.md); thiết kế: [M4 plan](docs/M4_IMPLEMENTATION_PLAN.md). M4 đang chờ review trên feature branch, chưa merge/phát hành v1.0.0.
+Các model M1/M3 chỉ cần để tạo artifact trước M4 hoặc chạy E2E thật, không tải lúc khởi động. Hướng dẫn model, test đầy đủ, kết quả, giới hạn và 18 tiêu chí: [M4 test report](docs/M4_TEST_REPORT.md); thiết kế: [M4 plan](docs/M4_IMPLEMENTATION_PLAN.md). M4 đã merge qua PR #6. Hướng dẫn source release v1.0.0: [cài đặt và nâng cấp](docs/RELEASE_v1.0.0.md); Windows packaging thuộc M5, chưa nằm trong bản này.
 
-## Smart Auto Review (feature branch)
+## Smart Auto Review
 
 Trong Nhận diện & Dịch, chọn Thủ công (mặc định), Smart Auto Review (khuyên dùng), hoặc Auto Approve All. Smart đánh giá OCR và bản dịch độc lập; chỉ cụm khớp chính xác thuật ngữ đã kiểm chứng mới có đủ bằng chứng để tự duyệt. Câu neural chưa xác định được nghĩa vẫn cần kiểm tra dù OCR=1.000. Điểm là heuristic, không phải xác suất đúng.
 
@@ -32,7 +32,7 @@ Có duyệt các đoạn đã chọn / cả trang (tối đa 100) kèm xác nh�
 
 Migration review phiên bản 20 chỉ thêm bảng trạng thái/audit, có backup SQLite; trạng thái cũ pending/approved/rejected vẫn được giữ cho M1 và M2. AUTO_APPROVED và MANUALLY_APPROVED cùng ánh xạ approved. Không gọi API ngoài. Cấu hình AUTO_REVIEW_* trong .env.example. Chạy bằng `.\.venv-m1-clean\Scripts\python.exe -m streamlit run app/main.py`; test đầy đủ với M1_RUN_REAL=1. Chi tiết: docs/SMART_AUTO_REVIEW_PLAN.md.
 
-Ứng dụng Windows chạy cục bộ: nhập MP4/MOV/MKV, giữ bản gốc, lưu SQLite, nhận diện chữ Trung bằng PaddleOCR, gom caption, dịch Việt offline và sửa/duyệt từng đoạn. Giao diện tiếng Việt, không cần tài khoản hoặc API trả phí. M0 đã được duyệt/phát hành v0.1.0; M1 nằm trên nhánh feature để review. Chưa xóa chữ, chèn chữ vào video, nhận diện giọng nói, lồng tiếng, phụ đề hay xuất video đã xử lý.
+Ứng dụng Windows chạy cục bộ: nhập MP4/MOV/MKV, giữ bản gốc, lưu SQLite, nhận diện chữ Trung bằng PaddleOCR, gom caption, dịch Việt offline và sửa/duyệt từng đoạn. Giao diện tiếng Việt, không cần tài khoản hoặc API trả phí. M0–M4 đã tích hợp: thay chữ Việt trên hình, nhận diện/lồng tiếng Việt, ASS và MP4 cuối. Bản dịch/lời nói cần duyệt trước xuất.
 
 ## Cài đặt (PowerShell)
 
@@ -152,7 +152,7 @@ Dependencies ghim ở `requirements.txt`; metadata hỗ trợ Python được ki
 
 Kết quả thực tế và các mục chưa kiểm chứng: xem `docs/IMPLEMENTATION_LOG.md` và `docs/M0_ACCEPTANCE.md`.
 
-Quy trình Git: M0 có tag `v0.1.0` trên main. M1 đã được chủ dự án merge qua PR #2 vào approved develop `bb4b94a`. Smart Review đã được chủ dự án merge qua PR #3 vào develop `c76f4c5`; M2 đã cập nhật baseline này và kiểm chứng chung. Chỉ push nhánh M2 và tạo PR, không merge PR M2, không đổi main/tag/release và không làm M3.
+Quy trình Git: M0 có tag `v0.1.0` trên main. M1 đã được chủ dự án merge qua PR #2 vào approved develop `bb4b94a`. Smart Review đã được chủ dự án merge qua PR #3 vào develop `c76f4c5`; M2 đã cập nhật baseline này và kiểm chứng chung. Đây là lịch sử workflow M2; trạng thái hiện tại xem CHANGELOG.md và báo cáo nghiệm thu M4.
 
 ## Thay chữ và xuất MP4 (M2)
 
@@ -219,4 +219,4 @@ Cấu hình M3 trong .env.example: provider/model paths, ngôn ngữ/device, chu
 
 Kiểm chứng: **177 test pass**, gồm toàn bộ M0–M3/Smart,38 test M3 xác định và một E2E real Whisper→Argos→duyệt→TTS Việt→WAV5s/120.000 mẫu. Chạy `python -m pytest tests/test_m3.py -q`; bật M1_RUN_REAL/M2_RUN_REAL/M3_RUN_REAL để chạy đầy đủ model thật đã cài. Fixture tiếng Trung gốc được tạo bằng model AISHELL3 tùy chọn `setup_m3_models.py --fixture-chinese`, không dùng audio creator. ASR/giọng/dịch có giới hạn chất lượng; không phải benchmark thực tế tổng quát.
 
-[M3_TEST_REPORT.md](docs/M3_TEST_REPORT.md) ghi đủ17 tiêu chí PASS/NOT TESTED, model/giấy phép, test thật so với mock, lệnh PowerShell và contract M4. Gọi `approved_dub(sessions,settings,project_id)` từ `app.services.dubbing_contract` để lấy audio/Chinese+Vietnamese transcript/timestamps/raw TTS/sync/config; hàm chặn output stale/sửa/hỏng/mất quyền. Chỉ push nhánh feature M3 và mở PR vào develop; không merge, tag v0.4.0, release hoặc làm M4.
+[M3_TEST_REPORT.md](docs/M3_TEST_REPORT.md) ghi đủ17 tiêu chí PASS/NOT TESTED, model/giấy phép, test thật so với mock, lệnh PowerShell và contract M4. Gọi `approved_dub(sessions,settings,project_id)` từ `app.services.dubbing_contract` để lấy audio/Chinese+Vietnamese transcript/timestamps/raw TTS/sync/config; hàm chặn output stale/sửa/hỏng/mất quyền. M3 đã merge qua PR #5 và tích hợp M4; workflow mới theo bản phát hành hiện tại.
