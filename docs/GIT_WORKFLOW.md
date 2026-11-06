@@ -6,7 +6,7 @@
 - `develop`: integration branch; merge reviewed feature pull requests here.
 - `feature/m0-foundation`: M0 implementation. No M1 work until the owner approves M0.
 
-The initial repository has a policy-only baseline on main/develop; M0 is on the feature branch until its PR is approved and merged. The owner supplied `https://github.com/hphuc032/Fashion-AI`; it is configured locally as `origin`. A read-only `git ls-remote` check returned no heads or tags on 2026-11-05. All branches and commits created by this setup are local. Nothing has been pushed or published.
+The repository started with a policy-only baseline on main/develop. The owner supplied `https://github.com/hphuc032/Fashion-AI`, configured as `origin`. On 2026-11-05 the owner approved M0 and authorized publication: feature/m0-foundation was pushed, PR #1 passed its Actions checks and was merged into develop at 806c114c19066115cdc38d3894281271e23da9d2. The approved main integration is the target for annotated v0.1.0. See IMPLEMENTATION_LOG.md for evidence. Preserve the feature branch and wait for separate M1 approval.
 
 ## Commits and review
 
@@ -18,7 +18,7 @@ Before PR: run the complete M0 suite with Python 3.11 and real FFmpeg/FFprobe co
 
 ## Integrating M0 (owner-approved next action)
 
-Prepared PR body: `docs/PR_M0_FOUNDATION.md`. Base `develop`, head `feature/m0-foundation`. Do not open a remote PR or push branches without explicit approval.
+Prepared PR body: `docs/PR_M0_FOUNDATION.md`. Base `develop`, head `feature/m0-foundation`. M0 publication was explicitly approved and completed through https://github.com/hphuc032/Fashion-AI/pull/1. Future pushes/PRs require authorization within their task scope.
 
 After the owner explicitly authorizes publishing branches, recheck origin for new history. If it is still empty, push `develop` and `feature/m0-foundation` explicitly, then open a PR using the prepared body. If new remote history exists, fetch and reconcile it first; never force-push over it. Do not push `main` as an incidental step.
 
@@ -43,4 +43,4 @@ These commands are instructions only; setup does not execute them. With a hosted
 
 ## Release gate
 
-When M0 is verified **and the owner approves it**, propose annotated tag `v0.1.0` on the approved stable main commit after an approved develop→main integration. Do not create the tag yet. Tagging, pushing tags and publishing a GitHub release are separate actions requiring explicit authorization. Never tag an unmerged feature commit as a stable release.
+The owner approved M0 and explicitly authorized annotated tag `v0.1.0` on the approved main integration. Future releases require their own verification and approval. Never move an already published release tag or tag an unmerged feature commit as a stable release. GitHub release pages/assets are separate from Git tags; this publication uses the requested annotated Git tag and does not upload generated binaries or user media.
