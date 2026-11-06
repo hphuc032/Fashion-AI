@@ -1,0 +1,19 @@
+name: Install CPU media tools
+description: Use the official HTTPS Ubuntu mirror with bounded retries for FFmpeg and fonts.
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        set -euo pipefail
+        # Azure's HTTP mirror repeatedly stalled before any application test ran.
+        # Keep Ubuntu archive signatures enabled; only change the transport/mirror.
+        for source in /etc/apt/apt-mirrors.txt /etc/apt/sources.list /etc/apt/sources.list.d/ubuntu.sources; do
+          if [ -f "$source" ]; then
+            sudo sed -i 's|http://azure.archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' "$source"
+          fi
+        done
+        sudo apt-get -o Acquire::Retries=3 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 update
+        sudo apt-get -o Acquire::Retries=3 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 install -y --no-install-recommends ffmpeg fonts-dejavu-core
+        ffmpeg -hide_banner -version
+        ffprobe -hide_banner -version

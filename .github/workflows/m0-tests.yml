@@ -20,10 +20,9 @@ jobs:
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: '3.11'
+      - uses: ./.github/actions/setup-media
       - name: Install FFmpeg and Python dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y ffmpeg
           python -m pip install -r requirements.txt
       - name: Verify real media tools and run the M0 suite
         run: |
@@ -51,10 +50,9 @@ jobs:
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: '3.11'
+      - uses: ./.github/actions/setup-media
       - name: Install M1 CPU dependencies (no models)
         run: |
-          sudo apt-get update
-          sudo apt-get install -y ffmpeg
           python -m pip install -r requirements-m1.txt
       - name: Test M1 services, migrations, supervisor and populated review UI
         run: |
@@ -82,10 +80,9 @@ jobs:
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: '3.11'
+      - uses: ./.github/actions/setup-media
       - name: Install CPU renderer and system fonts
         run: |
-          sudo apt-get update
-          sudo apt-get install -y ffmpeg fonts-dejavu-core
           python -m pip install -r requirements-m2.txt
       - name: Test compositor, persistence, UI and actual FFmpeg exports
         run: python -m pytest tests/test_m2.py -q --tb=short --junitxml=/tmp/m2-results.xml
@@ -110,10 +107,9 @@ jobs:
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: '3.11'
+      - uses: ./.github/actions/setup-media
       - name: Install CPU audio dependencies (no model downloads)
         run: |
-          sudo apt-get update
-          sudo apt-get install -y ffmpeg fonts-dejavu-core
           python -m pip install -r requirements-m3.txt
       - name: Verify extraction, synchronization, assembly, jobs and Studio
         run: python -m pytest tests/test_m3.py -q --tb=short --junitxml=/tmp/m3-results.xml
@@ -138,10 +134,9 @@ jobs:
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: '3.11'
+      - uses: ./.github/actions/setup-media
       - name: Install FFmpeg libass, fonts and CPU runtime (no models)
         run: |
-          sudo apt-get update
-          sudo apt-get install -y ffmpeg fonts-dejavu-core
           python -m pip install -r requirements-m4.txt
       - name: Verify ASS, real mux/presets, artifact integration and export UI
         run: python -m pytest tests/test_m4.py -q --tb=short --junitxml=/tmp/m4-results.xml
