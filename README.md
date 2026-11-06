@@ -220,3 +220,5 @@ Cấu hình M3 trong .env.example: provider/model paths, ngôn ngữ/device, chu
 Kiểm chứng: **177 test pass**, gồm toàn bộ M0–M3/Smart,38 test M3 xác định và một E2E real Whisper→Argos→duyệt→TTS Việt→WAV5s/120.000 mẫu. Chạy `python -m pytest tests/test_m3.py -q`; bật M1_RUN_REAL/M2_RUN_REAL/M3_RUN_REAL để chạy đầy đủ model thật đã cài. Fixture tiếng Trung gốc được tạo bằng model AISHELL3 tùy chọn `setup_m3_models.py --fixture-chinese`, không dùng audio creator. ASR/giọng/dịch có giới hạn chất lượng; không phải benchmark thực tế tổng quát.
 
 [M3_TEST_REPORT.md](docs/M3_TEST_REPORT.md) ghi đủ17 tiêu chí PASS/NOT TESTED, model/giấy phép, test thật so với mock, lệnh PowerShell và contract M4. Gọi `approved_dub(sessions,settings,project_id)` từ `app.services.dubbing_contract` để lấy audio/Chinese+Vietnamese transcript/timestamps/raw TTS/sync/config; hàm chặn output stale/sửa/hỏng/mất quyền. M3 đã merge qua PR #5 và tích hợp M4; workflow mới theo bản phát hành hiện tại.
+
+Lịch sử M0: [PR #1](https://github.com/hphuc032/Fashion-AI/pull/1) đã qua CI và merge; tag chú thích v0.1.0 giữ nguyên trên main. Workflow: docs/GIT_WORKFLOW.md; thông tin hiện tại xem CHANGELOG.md.

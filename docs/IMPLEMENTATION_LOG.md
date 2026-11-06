@@ -50,6 +50,14 @@ Owner approved final acceptance and explicitly authorized feature push, PR/merge
 
 Added read-only GitHub Actions M0 test check (Python 3.11, Ubuntu, real FFmpeg/FFprobe) so PR checks can be verified before merge. Official checkout/setup-python v6 tags resolved to immutable commit SHAs. CI explicitly requires all 26 tests with no skipped tests. No M1 code changes.
 
+## 2026-11-05 — Approved M0 integration and v0.1.0
+
+Published main/develop baselines and feature/m0-foundation without force-push. Feature head: a222f9616461323e2fcac92e83d64990dc1c7a62. Opened https://github.com/hphuc032/Fashion-AI/pull/1 targeting develop. PR Actions run https://github.com/hphuc032/Fashion-AI/actions/runs/41965331130 completed successfully, including the explicit assertion of 26 tests, zero failures/errors/skips. No failed checks were bypassed. GitHub legacy commit statuses were empty; Actions workflow/job results provided the test evidence.
+
+Merged PR #1 using a merge commit and expected-head SHA protection: **806c114c19066115cdc38d3894281271e23da9d2**. Fetched and fast-forwarded local develop to that remote commit. Feature branch retained. Prepared a non-fast-forward main merge from this verified develop commit; application/tests/CI tree is unchanged from develop. Reran the integration tree locally on Python 3.11.18 with real FFmpeg/FFprobe: **26 passed in 1.76s**, zero skips. Documentation updates record approval/publication status.
+
+The resulting main integration commit is the authorized target for annotated **v0.1.0**, with annotation documenting M0 approval, PR #1, develop merge SHA and verification. Branch/tag publication and exact remote SHA verification are performed after this log is committed; the final handoff reports their observed results. This avoids embedding a commit's own hash in its contents or claiming a future push has already succeeded. No GitHub release binaries or generated user assets are uploaded. No M1 work; feature branch must remain available.
+
 ## 2026-11-05 — M1 OCR, offline translation and review
 
 Read full AGENT_MVP_SPEC, README, implementation log, M0 plan, all M0 modules/tests before application edits. Working tree was clean on approved main a3d2e63. Fetched origin and created feature/m1-ocr-translation from latest approved origin/develop **806c114c19066115cdc38d3894281271e23da9d2**. Recorded plan first in docs/M1_IMPLEMENTATION_PLAN.md (commit 774c74c). Original M0 suite: **26 passed in 1.78s**. Owner's subsequent workflow update authorizes verified feature push/PR, not merge/main modification/v0.2.0/M2.
