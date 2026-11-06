@@ -8,22 +8,39 @@ from app.core.config import Settings
 from app.services.storage_service import import_video, list_projects
 from app.ui.components import RIGHTS, project_preview
 from app.utils.validators import UserError, validate_source
+from app.version import __version__
 
 log = logging.getLogger("fashion_ai.ui")
 
 
 def dashboard(settings: Settings, sessions: sessionmaker) -> None:
     st.title(settings.app_name)
-    st.caption("Không gian video của bạn · Nền tảng M0")
-    page = st.sidebar.radio("Điều hướng", ["Tổng quan", "Tải video", "Thư viện"])
-    st.sidebar.caption("Chạy cục bộ • Không sử dụng API trả phí")
+    st.caption("Không gian video của bạn · Nhập video, OCR và bản dịch")
+    page = st.sidebar.radio("Điều hướng", ["Tổng quan", "Tải video", "Thư viện", "Nhận diện & Dịch", "Text Replacement Studio", "AI Dubbing Studio", "Final Export Studio"])
+    st.sidebar.caption(f"v{__version__} • Chạy cục bộ • Cloud chỉ khi chủ động chọn")
+    if page == 'Final Export Studio':
+        from app.ui.final_export_studio import final_export_studio
+        final_export_studio(settings,sessions)
+        return
+    if page == 'AI Dubbing Studio':
+        from app.ui.dubbing_studio import dubbing_studio
+        dubbing_studio(settings,sessions)
+        return
+    if page == "Text Replacement Studio":
+        from app.ui.replacement_studio import replacement_studio
+        replacement_studio(settings,sessions)
+        return
+    if page == "Nhận diện & Dịch":
+        from app.ui.ocr_page import ocr_page
+        ocr_page(settings, sessions)
+        return
     projects = list_projects(sessions)
     if page == "Tổng quan":
         a, b, c = st.columns(3)
         a.metric("Video đã nhập", len(projects))
         b.metric("Dung lượng đã nhập", f"{sum(p.file_size for p in projects) / 1024**2:.1f} MB")
         c.metric("Thời lượng", f"{sum(p.duration for p in projects):.0f} giây")
-        st.info("M0: tải video, kiểm tra thông tin và xem bản gốc. Các bước AI sẽ được bổ sung ở mốc tiếp theo.")
+        st.info("Tải video, xem bản gốc và nhận diện chữ Trung ở mục Nhận diện & Dịch. Mọi bản dịch cần được kiểm tra và duyệt.")
     if page == "Tải video":
         st.subheader("Nhập video mới")
         st.caption(f"MP4 / MOV / MKV · Tối đa {settings.max_upload_size_mb} MB và {settings.max_video_seconds:g} giây")
