@@ -55,6 +55,10 @@ class Settings(BaseModel):
     dub_max_segments: int = Field(default=300,ge=1,le=1000)
     sync_min_factor: float = Field(default=.85,ge=.5,le=1)
     sync_max_factor: float = Field(default=1.2,ge=1,le=1.5)
+    final_timeout_seconds: int = Field(default=1800,ge=30,le=7200)
+    final_preview_max_seconds: float = Field(default=15.0,ge=1,le=30)
+    final_preview_cache_entries: int = Field(default=5,ge=1,le=20)
+    final_max_pixels: int = Field(default=8294400,ge=1000000,le=16777216)
     auto_review_enabled: bool = True
     auto_review_ocr_high_threshold: float = Field(default=.95, ge=0, le=1)
     auto_review_ocr_low_threshold: float = Field(default=.80, ge=0, le=1)
