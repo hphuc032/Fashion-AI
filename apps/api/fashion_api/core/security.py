@@ -150,7 +150,7 @@ class LocalBoundary:
                 return await reject(401, "SESSION_REQUIRED", "Local session is missing or expired.")
             if mutation:
                 csrf = values(b"x-csrf-token")
-                if len(csrf) != 1 or not secrets.compare_digest(csrf[0], session.csrf):
+                if len(csrf) != 1 or not secrets.compare_digest(csrf[0].encode("utf-8"), session.csrf.encode("ascii")):
                     return await reject(403, "CSRF_REJECTED", "Invalid session confirmation.")
             scope.setdefault("state", {}).update(session=session, session_token=tokens[0])
         return await self.app(scope, receive, secured)
