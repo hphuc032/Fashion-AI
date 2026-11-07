@@ -100,3 +100,11 @@ def test_cookie_duplicate_rejected(client):
     authenticate(client)
     token = client.cookies.get("fashion_web_session")
     assert client.get("/api/v1/system/status", headers={"Cookie": f"fashion_web_session={token}; fashion_web_session={token}"}).status_code == 401
+
+
+def test_non_ascii_csrf_rejected_without_internal_error(client):
+    authenticate(client)
+    response = client.delete("/api/v1/session", headers=[(b"origin", ORIGIN.encode()), (b"x-csrf-token", b"\xff")])
+    assert response.status_code == 403
+    assert response.json()["error"]["code"] == "CSRF_REJECTED"
+    assert client.get("/api/v1/session").status_code == 200

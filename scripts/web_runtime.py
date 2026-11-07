@@ -243,7 +243,8 @@ def supervise(config, *, no_browser=False, timeout=45, backend_command=None, fro
             wait_ready(lambda: frontend_ready(record), frontend, timeout)
             state["state"] = "running"; write_status(directory, state)
             if not no_browser:
-                webbrowser.open("http://127.0.0.1:3000/dashboard#bootstrap=" + secret)
+                if not webbrowser.open("http://127.0.0.1:3000/dashboard#bootstrap=" + secret):
+                    raise RuntimeFailure("Cannot open the default browser; owned Web services will be stopped.")
             del secret
             while backend.poll() is None and frontend.poll() is None:
                 stop = directory / "stop.json"

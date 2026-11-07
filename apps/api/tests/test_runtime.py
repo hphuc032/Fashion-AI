@@ -8,6 +8,9 @@ import socket
 import subprocess
 import sys
 import time
+import threading
+import queue
+from urllib.parse import urlparse, parse_qs
 
 import psutil
 import pytest
@@ -154,3 +157,33 @@ def test_readiness_timeout_is_bounded():
     with pytest.raises(runtime.RuntimeFailure):
         runtime.wait_ready(lambda: False, Running(), .2)
     assert time.monotonic() - started < 1
+
+
+def test_supervisor_generated_browser_handoff_reaches_real_api(config, monkeypatch):
+    import httpx
+    links = queue.Queue()
+    result = []
+    monkeypatch.setattr(runtime.webbrowser, "open", lambda url: (links.put(url), True)[1])
+    thread = threading.Thread(target=lambda: result.append(runtime.supervise(config, timeout=15)), daemon=True)
+    thread.start()
+    try:
+        url = links.get(timeout=30)
+        parsed = urlparse(url)
+        assert parsed.scheme == "http" and parsed.netloc == "127.0.0.1:3000" and not parsed.query
+        secret = parse_qs(parsed.fragment)["bootstrap"][0]
+        assert len(secret) >= 43
+        with httpx.Client(base_url="http://127.0.0.1:8000", trust_env=False) as client:
+            response = client.post("/api/v1/session/bootstrap", headers={"Origin": "http://127.0.0.1:3000"}, json={"bootstrap_secret": secret})
+            assert response.status_code == 200
+            assert client.get("/api/v1/system/status").status_code == 200
+            assert client.post("/api/v1/session/bootstrap", headers={"Origin": "http://127.0.0.1:3000"}, json={"bootstrap_secret": secret}).status_code == 401
+        for p in config.runtime_dir.iterdir():
+            if p.suffix in {".json", ".log"}:
+                assert secret not in p.read_text(errors="replace")
+    finally:
+        state = runtime.read_status(config.runtime_dir)
+        if state.get("run_id"):
+            runtime.atomic_json(config.runtime_dir / "stop.json", {"run_id": state["run_id"]})
+        thread.join(timeout=20)
+    assert not thread.is_alive() and result == [0]
+    runtime.ports_available()
