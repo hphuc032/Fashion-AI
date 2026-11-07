@@ -128,6 +128,8 @@ Actual local verification uses a fresh explicit pytest basetemp outside the repo
 - **PASS:** independent hashed Python install, second clean hashed install and pip check.
 - **PASS:** clean npm ci; npm ls --all has no invalid peers; npm audit0 advisories at dependency verification.
 - **PASS:** 54 Python tests in42.38s, failures0/errors0/skips0; includes API, negative security, real Windows lifecycle through both PowerShell7 and Windows PowerShell5.1, restart, duplicate, occupied ports, ownership and partial failures. One TestClient deprecation warning.
+- **PASS:** subsequent full55-test run in67.46s,0fail/error/skip, adds production supervisor-generated bootstrap→real API one-use handoff and log/status secrecy. Default-browser open failure now rolls back rather than silently leaving an unusable authenticated workspace. A later non-ASCII CSRF regression is verified separately with the final API/security suite; the final collected W1 set has56 cases.
+- **PASS:** final API/security suite42 passed in7.61s,0fail/error/skip after byte-based constant-time CSRF comparison; non-ASCII invalid tokens return403 without internal error or revoking a valid session. The14 lifecycle cases are covered by the preceding full55-case run; no final56-case local full-run claim is made.
 - **PASS:** 215 existing deterministic M0–M4 tests in111.34s, failures0/errors0/skips0, explicitly separate disposable engine storage/database and unchanged engine environment.
 - **PASS:** TypeScript, lint, production build; 8 frontend unit/component tests. Final browser/publication results are appended after execution.
 - **PASS:** 6 real two-service Chromium tests in17.5s, failures0/skips0: authenticated dashboard/actual DTO, wrong Host/Origin/missing session, one-use replay, restart/session invalidation/reconnect/revoke, actual API disconnect/offline/recovery, mobile width and keyboard navigation. Screenshot visually inspected after fragment removal. No HTTP mocks or user profile used.
@@ -139,6 +141,14 @@ Synthetic test DB writes stay in QA fixtures. “No database writes” here mean
 ## Data protection, limits and approval gate
 
 Private before/after SHA inventory covers1074 readable existing storage files. One active M5 `desktop.lock` is exclusively locked and cannot be content-hashed; it is an explicit verification limitation, not a reason to stop/alter M5. No user DB was opened with SQLite by W1. File hash preservation is not a SQLite integrity audit.
+
+One repeat of the expanded local suite encountered backend readiness timeout on a PowerShell5.1 startup; safe cleanup completed. It was not counted as success or removed. The subsequent unchanged full55-case run passed. A later host snapshot showed88.8% RAM usage, which does not prove the timeout's cause. Fixed readiness deadlines and safe failure remain intentional; startup latency under host contention is not guaranteed. Hosted Windows verification is separate evidence, not grounds to hide that local observation.
+
+## Publication and hosted evidence
+
+Published [Draft PR #12](https://github.com/hphuc032/Fashion-AI/pull/12) targeting develop `51f12832e8feb13b0db12374292e2d6d2284ae64`. Initial publication head `290104054e4ac0f64bf296f80221589694ae1024` passed all five unchanged M0–M4 jobs in [legacy run34](https://github.com/hphuc032/Fashion-AI/actions/runs/42342510196), plus the additive [Windows W1 run2](https://github.com/hphuc032/Fashion-AI/actions/runs/42342510054). Inspected W1 logs show54 Python tests,8 frontend tests and6 real browser tests passed, frozen installs/type/lint/build successful. Runner Python was3.11.9, independent of local3.11.18. These run IDs describe that immutable initial head, not later commits.
+
+Follow-up hardening and tests stay on this same W1 branch with normal commits/pushes. Latest head/check URLs and exact state are reported in PR metadata and final handoff; no self-referential SHA is embedded in its own commit. PR #10/#11 metadata compared unchanged before publication. No merge, release, history rewrite or later milestone occurred.
 
 Deferred: W2–W7 CRUD/uploads/media/jobs/WS/AI integration, model inventory, DB adoption/migration, M5 reuse and releases. W1 has no generic filesystem/SQL/provider-setting mutation endpoint. Local HTTP and same-account malware limits remain; ESLint/TestClient tooling warnings require future compatible upgrades. No merge/release/main/develop/PR10/PR11 change occurs. Stop after W1 for owner review.
 
