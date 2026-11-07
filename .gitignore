@@ -103,3 +103,11 @@ Thumbs.db
 Desktop.ini
 *.swp
 *.tmp
+
+# Isolated Web foundation tooling and disposable verification artifacts
+node_modules/
+.next/
+*.tsbuildinfo
+playwright-report/
+test-results/
+.web-local/
