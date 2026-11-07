@@ -368,4 +368,3 @@ The following appendix is generated from Python AST at the audited revisions. It
 - scripts/build_windows.py:15 — `sha(path)`
 - scripts/build_windows.py:22 — `copy_ignore(folder, names)`
 - scripts/build_windows.py:27 — `build(runtime, site_packages, ffmpeg, ffprobe, notice, ffmpeg_license, output, archive=True)`
-
