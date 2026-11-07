@@ -103,3 +103,16 @@ Thumbs.db
 Desktop.ini
 *.swp
 *.tmp
+
+# Isolated Web foundation tooling and disposable verification artifacts
+node_modules/
+.next/
+*.tsbuildinfo
+playwright-report/
+test-results/
+.web-local/
+
+# MPEG-TS stays ignored elsewhere; these are Web TypeScript source/config files.
+!apps/web/*.ts
+!apps/web/src/**/*.ts
+!apps/web/e2e/**/*.ts
