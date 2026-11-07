@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.1.0.dev0 — Unreleased M5 preview
+
+- One-folder PyInstaller launcher with managed CPython3.11/dependencies/FFmpeg; external models and persistent AppData.
+- Single-instance ownership/health checks, clean stop/restart, curated diagnostics/version/data directory display.
+- Additive schema60 model-download history; explicit CPU model catalog with pinned SHA256, safe staging/cancel/recovery and shared heavy-work exclusion.
+- Desktop & Models page, checksum verification, source/license/download sizes; no startup model download.
+- Private backup/restore with SQLite checkpoint and manifest verification; expired top-level temp cleanup only. Data survives code folder relocation/upgrades.
+- Windows build/first-run/upgrade/uninstall/troubleshooting instructions and actual packaged-runtime tests. Clean Windows/installer/signing qualification remains NOT TESTED; no installer orv1.1.0 published.
+
 ## 1.0.0 — 2026-11-06
 
 First complete M0–M4 source release. M4 PR#6 merged into develop as ce1df24f20a46b9bb8a1fab6f5ed6381fc911e15 after five green CI jobs on67b8ffb and user-confirmed interactive acceptance.
