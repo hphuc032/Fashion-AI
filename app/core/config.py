@@ -77,7 +77,7 @@ class Settings(BaseModel):
 
 
 def load_settings() -> Settings:
-    load_dotenv(ROOT / ".env", override=False)
+    load_dotenv(Path(os.environ.get('FASHION_AI_ENV_FILE', str(ROOT / '.env'))), override=False)
     values = {key: os.environ[key.upper()] for key in Settings.model_fields
               if key.upper() in os.environ}
     for key in ("ocr_models_dir", "argos_models_dir",'funasr_vad_dir','funasr_punc_dir','funasr_speaker_dir'):
