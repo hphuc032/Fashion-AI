@@ -79,6 +79,7 @@ class LocalBoundary:
                          (b"referrer-policy", b"no-referrer"), (b"content-security-policy", b"default-src 'none'; frame-ancestors 'none'")]
                 if origin == self.config.frontend_origin:
                     extra += [(b"access-control-allow-origin", origin.encode()),
+                              (b"access-control-expose-headers", b"Content-Range, Accept-Ranges, ETag"),
                               (b"access-control-allow-credentials", b"true"), (b"vary", b"Origin")]
                 message = {**message, "headers": [*message.get("headers", []), *extra]}
             await send(message)
@@ -91,55 +92,25 @@ class LocalBoundary:
             return await reject(400, "HOST_REJECTED", "Invalid local host authority.")
         if len(origins) > 1 or (origins and origin != self.config.frontend_origin):
             return await reject(403, "ORIGIN_REJECTED", "Only the local frontend origin is allowed.")
-        if scope.get("query_string"):
+        if scope.get("query_string") and not (path == "/api/v1/projects" and method == "GET"):
             return await reject(400, "QUERY_REJECTED", "Query parameters are not supported in W1.")
         if method == "OPTIONS":
             requested = values(b"access-control-request-method")
-            allowed_headers = {"content-type", "x-csrf-token"}
+            allowed_headers = {"content-type", "x-csrf-token", "idempotency-key", "if-match"}
             requested_headers = values(b"access-control-request-headers")
-            if origin != self.config.frontend_origin or requested not in (["GET"], ["POST"], ["DELETE"]):
+            if origin != self.config.frontend_origin or requested not in (["GET"], ["POST"], ["DELETE"], ["PATCH"]):
                 return await reject(403, "PREFLIGHT_REJECTED", "Invalid preflight.")
             if len(requested_headers) > 1 or (requested_headers and not {
                     h.strip().lower() for h in requested_headers[0].split(",")}.issubset(allowed_headers)):
                 return await reject(403, "PREFLIGHT_REJECTED", "Invalid preflight headers.")
             from starlette.responses import Response
-            return await Response(status_code=204, headers={"Access-Control-Allow-Methods": "GET, POST, DELETE",
-                "Access-Control-Allow-Headers": "Content-Type, X-CSRF-Token", "Access-Control-Max-Age": "300"})(scope, receive, secured)
+            return await Response(status_code=204, headers={"Access-Control-Allow-Methods": "GET, POST, DELETE, PATCH",
+                "Access-Control-Allow-Headers": "Content-Type, X-CSRF-Token, Idempotency-Key, If-Match", "Access-Control-Max-Age": "300"})(scope, receive, secured)
         public = path == "/api/v1/health" and method == "GET"
         bootstrap = path == "/api/v1/session/bootstrap" and method == "POST"
         mutation = method not in {"GET", "HEAD", "OPTIONS"}
         if (mutation or bootstrap) and origin != self.config.frontend_origin:
             return await reject(403, "ORIGIN_REJECTED", "Mutation requires the local frontend origin.")
-        if mutation:
-            content = values(b"content-type")
-            if method != "DELETE" and (len(content) != 1 or content[0].split(";", 1)[0].lower() != "application/json"):
-                return await reject(415, "CONTENT_TYPE_REJECTED", "JSON is required.")
-            # W1 accepts only a tiny bootstrap JSON body, never uploads.
-            size = 0
-            parts = []
-            while True:
-                message = await receive()
-                if message["type"] == "http.disconnect":
-                    return
-                block = message.get("body", b"")
-                size += len(block)
-                if size > 2048:
-                    return await reject(413, "BODY_TOO_LARGE", "Request body is too large.")
-                parts.append(block)
-                if not message.get("more_body", False):
-                    break
-            body = b"".join(parts)
-            delivered = False
-            original_receive = receive
-
-            async def replay():
-                nonlocal delivered
-                if not delivered:
-                    delivered = True
-                    return {"type": "http.request", "body": body, "more_body": False}
-                return await original_receive()
-
-            receive = replay
         if not public and not bootstrap:
             # Strict cookie parsing avoids ambiguous duplicate session values.
             cookies = values(b"cookie")
@@ -153,4 +124,47 @@ class LocalBoundary:
                 if len(csrf) != 1 or not secrets.compare_digest(csrf[0].encode("utf-8"), session.csrf.encode("ascii")):
                     return await reject(403, "CSRF_REJECTED", "Invalid session confirmation.")
             scope.setdefault("state", {}).update(session=session, session_token=tokens[0])
+        upload = mutation and path == "/api/v1/projects" and method == "POST"
+        if mutation:
+            content = values(b"content-type")
+            expected = "multipart/form-data" if upload else "application/json"
+            if method != "DELETE" and (len(content) != 1 or content[0].split(";", 1)[0].lower() != expected):
+                return await reject(415, "CONTENT_TYPE_REJECTED", "Unsupported request content type.")
+            if upload:
+                # Count actual streamed bytes, including requests without Content-Length.
+                # Multipart parser owns/cleans its bounded disk spool on rejection.
+                original_receive = receive
+                size = 0
+                limit = self.config.max_upload_size_mb * 1024 * 1024 + 65536
+                async def bounded_receive():
+                    nonlocal size
+                    message = await original_receive()
+                    size += len(message.get("body", b""))
+                    if size > limit:
+                        from starlette.formparsers import MultiPartException
+                        scope.setdefault("state", {})["upload_too_large"] = True
+                        raise MultiPartException("Upload limit exceeded")
+                    return message
+                receive = bounded_receive
+            else:
+                size = 0
+                parts = []
+                while True:
+                    message = await receive()
+                    if message["type"] == "http.disconnect": return
+                    size += len(message.get("body", b""))
+                    if size > (16384 if method == "PATCH" else 2048):
+                        return await reject(413, "BODY_TOO_LARGE", "Request body is too large.")
+                    parts.append(message.get("body", b""))
+                    if not message.get("more_body", False): break
+                body = b"".join(parts)
+                delivered = False
+                original_receive = receive
+                async def replay():
+                    nonlocal delivered
+                    if not delivered:
+                        delivered = True
+                        return {"type":"http.request", "body":body, "more_body":False}
+                    return await original_receive()
+                receive = replay
         return await self.app(scope, receive, secured)

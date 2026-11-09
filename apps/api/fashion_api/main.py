@@ -64,9 +64,18 @@ def create_app(config: WebConfig | None = None, *, bootstrap_secret: str | None 
     app = FastAPI(title="Fashion AI Local Web", version="0.1.0", lifespan=lifespan,
                   docs_url=None, redoc_url=None, openapi_url=None)
     app.state.config, app.state.access, app.state.instance_id = config, access, instance_id or str(uuid4())
+    import threading
+    app.state.upload_gate = threading.Lock()
     app.add_middleware(LocalBoundary, config=config, access=access)
     app.include_router(health.router)
     app.include_router(session.router)
+    from fashion_api.api.v1 import projects
+    from fashion_api.services.projects import ProjectError
+    app.include_router(projects.router)
+
+    @app.exception_handler(ProjectError)
+    async def project_error(_request, exc):
+        return error(exc.status, exc.code, exc.message)
 
     @app.get("/api/v1/openapi.json", include_in_schema=False)
     def openapi():
