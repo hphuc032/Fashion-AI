@@ -1,4 +1,10 @@
-# Fashion AI Localizer v1.0.0 — M0–M4
+# Fashion AI Localizer — M5 Windows preview
+
+Stable source release: [v1.0.0](https://github.com/hphuc032/Fashion-AI/releases/tag/v1.0.0), M0–M4 đã hoàn tất. Nhánh hiện tại bổ sung M5 với version `1.1.0.dev0`, chưa phát hành v1.1.0.
+
+M5 dùng PyInstaller launcher dạng thư mục, kèm CPython3.11/dependencies/FFmpeg đã quản lý; giữ model và dữ liệu tại `%LOCALAPPDATA%\FashionAILocalizer`, ngoài executable. Chạy `FashionAILocalizer.exe`, mở `Desktop & Models` để xem/tải model chủ động và kiểm tra SHA. Không tự tải khi startup. Có khóa chống mở trùng, health trước mở browser, `--stop`, backup/restore và cleanup tạm có giới hạn.
+
+Hướng dẫn: [Windows installation](docs/WINDOWS_INSTALLATION.md), [troubleshooting](docs/WINDOWS_TROUBLESHOOTING.md), [M5 test report](docs/M5_TEST_REPORT.md). Bản local Windows đã được kiểm thử trực tiếp; **Windows sạch/installer chưa được kiểm chứng**, không công bố installer hoặc coi đây là release v1.1.0.
 
 ## Local Web foundation — W1
 
