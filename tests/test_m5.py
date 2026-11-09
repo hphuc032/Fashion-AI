@@ -183,3 +183,39 @@ def test_wal_backup_manifest_stays_valid_after_all_connections_close(tmp_path):
     assert not any(name.endswith(('-wal','-shm')) for name in manifest)
     restore_data(backup,tmp_path/'restored')
     with sqlite3.connect(tmp_path/'restored/storage/fashion_ai.db') as c:assert c.execute('select * from original').fetchone()==('preserved',)
+
+
+def test_status_publication_retries_transient_windows_reader_sharing(tmp_path,monkeypatch):
+    from app.desktop.launcher import write_status,read_status
+    write_status(tmp_path,{'state':'starting'})
+    original=Path.replace;calls=[]
+    def replace(source,target):
+        calls.append(1)
+        if len(calls)<=3:
+            assert read_status(tmp_path)=={'state':'starting'}
+            raise PermissionError('Synthetic Windows sharing violation')
+        return original(source,target)
+    monkeypatch.setattr(Path,'replace',replace)
+    write_status(tmp_path,{'state':'running'})
+    assert len(calls)==4 and read_status(tmp_path)=={'state':'running'}
+    assert not list(tmp_path.glob('*.tmp'))
+
+
+def test_status_publication_failure_cleans_own_child_not_stale_status(tmp_path,monkeypatch):
+    from types import SimpleNamespace
+    import psutil
+    from app.desktop import launcher
+    bundle=tmp_path/'bundle';(bundle/'app').mkdir(parents=True);(bundle/'app/main.py').write_text('# QA fixture')
+    monkeypatch.setattr(launcher,'bundle_root',lambda:bundle)
+    monkeypatch.setattr(launcher.subprocess,'run',lambda *a,**k:SimpleNamespace(returncode=0,stdout=''))
+    monkeypatch.setattr(launcher.subprocess,'Popen',lambda *a,**k:SimpleNamespace(pid=98765))
+    monkeypatch.setattr(psutil,'Process',lambda pid:SimpleNamespace(create_time=lambda:1234.))
+    monkeypatch.setattr(launcher,'read_status',lambda root:{'server_pid':111,'launcher_pid':-1})
+    def fail(*args):raise RuntimeError('Synthetic status publication failure')
+    monkeypatch.setattr(launcher,'write_status',fail)
+    stopped=[];monkeypatch.setattr(launcher,'stop_owned',lambda status:stopped.append(status.copy()))
+    data=tmp_path/'private QA'
+    assert launcher.main(['--data-dir',str(data),'--no-browser'])==1
+    assert len(stopped)==1 and stopped[0]['server_pid']==98765
+    assert stopped[0]['server_created']==1234.
+    lock=InstanceLock(data);assert lock.acquire();lock.close()

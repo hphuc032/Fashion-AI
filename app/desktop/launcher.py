@@ -53,9 +53,18 @@ class InstanceLock:
 
 def write_status(root, payload):
     target = Path(root) / 'desktop-status.json'
-    partial = target.with_suffix('.tmp')
+    partial = target.with_name(f'{target.stem}.{uuid.uuid4().hex}.tmp')
     partial.write_text(json.dumps(payload), encoding='utf-8')
-    partial.replace(target)
+    # Windows readers may briefly hold the previous JSON without delete sharing.
+    # Retain the complete old status and bound retries of the atomic rename.
+    for attempt in range(80):
+        try:
+            partial.replace(target)
+            return
+        except PermissionError:
+            if attempt == 79:
+                raise RuntimeError('Cannot update launcher status; check data-directory permissions.') from None
+            time.sleep(.025)
 
 
 def read_status(root):
@@ -187,6 +196,7 @@ def main(argv=None):
             return 0
         print('Another instance is starting or maintenance is active. See data/logs.'); return 2
     process = None
+    owned_status = None
     env = child_environment(root, data, args.models_dir)
     try:
         if not python.is_file() or not (code/'app/main.py').is_file():
@@ -216,6 +226,7 @@ def main(argv=None):
         import psutil
         status = dict(state='starting', launcher_pid=os.getpid(), server_pid=process.pid, server_created=psutil.Process(process.pid).create_time(),
                       python=str(python), token=token, port=port, url=url, data_dir=str(data), log=str(log))
+        owned_status = status.copy()
         write_status(data,status)
         deadline = time.monotonic()+90
         while time.monotonic()<deadline:
@@ -234,10 +245,17 @@ def main(argv=None):
         print('Startup failed ('+type(exc).__name__+'). '+str(exc) if isinstance(exc,RuntimeError) else 'Startup failed. See logs/runtime-check.log.')
         return 1
     finally:
-        if process: stop_owned(read_status(data))
-        status=read_status(data)
-        if status.get('launcher_pid')==os.getpid(): status['state']='stopped'; write_status(data,status)
-        lock.close()
+        try:
+            # Failed status publication must not lose ownership of our child or
+            # substitute stale metadata belonging to another launch.
+            if process: stop_owned(owned_status or {})
+            status=read_status(data)
+            if status.get('launcher_pid')==os.getpid():
+                status['state']='stopped'
+                try:write_status(data,status)
+                except (OSError,RuntimeError):print('Launcher stopped; status update failed. Check data-directory permissions.')
+        finally:
+            lock.close()
 
 
 if __name__ == '__main__':
