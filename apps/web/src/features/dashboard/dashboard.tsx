@@ -1,4 +1,6 @@
 "use client";
+import Link from "next/link";
+import { ProjectOverview } from "@/features/projects/projects";
 import { useQuery } from "@tanstack/react-query";
 import {
   Activity,
@@ -130,6 +132,7 @@ export function Dashboard() {
           WEB FOUNDATION <b>W1</b>
         </span>
       </section>
+      <ProjectOverview />
       <div className="section-heading">
         <h2>Tình trạng hệ thống</h2>
         <span>
@@ -190,7 +193,7 @@ export function Dashboard() {
           </h3>
           <p>Schema và model chưa được kiểm tra</p>
           <div className="card-foot">
-            <LockKeyhole size={13} /> Không mở DB · Không nạp model
+            <LockKeyhole size={13} /> Health không mở DB · Không nạp model
           </div>
         </article>
       </div>
@@ -268,16 +271,14 @@ export function Dashboard() {
             Engine AI hiện có.
           </h2>
           <p>
-            Giao diện mới sẽ kết nối từng bước với quy trình Python đã có. Bản
-            W1 tập trung vào nền tảng và kết nối an toàn.
+            Giao diện mới sẽ kết nối từng bước với quy trình Python đã có. W2 kết nối thư viện dự án, upload và xem video gốc.
           </p>
           <div className="preservation">
             <ShieldCheck size={20} />
             <div>
               <strong>Dữ liệu hiện tại được giữ nguyên</strong>
               <span>
-                Không chọn kho dữ liệu, tải model hoặc thay đổi dự án ở giai
-                đoạn này.
+                Chỉ dùng kho dữ liệu đã cấu hình rõ ràng. Không tự chọn DB hoặc tải model.
               </span>
             </div>
           </div>
@@ -291,8 +292,8 @@ export function Dashboard() {
       </div>
       <section className="workflow-section">
         <div className="section-heading">
-          <h2>Quy trình sắp được kết nối</h2>
-          <span>Chưa khả dụng trong W1</span>
+          <h2>Quy trình bản địa hóa</h2>
+          <span>Các bước AI chưa khả dụng</span>
         </div>
         <div className="workflow-grid">
           {stages.map(({ title, text, icon: Icon, milestone }, i) => (
@@ -304,7 +305,7 @@ export function Dashboard() {
               <Icon size={21} />
               <h3>{title}</h3>
               <p>{text}</p>
-              <span className="milestone">{milestone} · Sắp có</span>
+              <span className="milestone">{milestone === "W2" ? <Link href="/projects">W2 · Mở thư viện</Link> : `${milestone} · Sắp có`}</span>
             </article>
           ))}
         </div>

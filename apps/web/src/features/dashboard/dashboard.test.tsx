@@ -35,7 +35,7 @@ it("shows real DTO state and keeps AI explicitly uninspected", async () => {
   expect(screen.getByTestId("schema-status")).toHaveTextContent(
     "not_inspected",
   );
-  expect(screen.getByText("Chưa khả dụng trong W1")).toBeInTheDocument();
+  expect(screen.getByText("Các bước AI chưa khả dụng")).toBeInTheDocument();
   expect(
     screen.queryByRole("button", { name: /OCR|render|tải video/i }),
   ).not.toBeInTheDocument();

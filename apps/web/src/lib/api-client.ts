@@ -16,7 +16,8 @@ export class ApiError extends Error {
 export async function request<T>(
   path: string,
   options: {
-    method?: "GET" | "POST" | "DELETE";
+    method?: "GET" | "POST" | "DELETE" | "PATCH";
+    headers?: Record<string, string>;
     body?: unknown;
     signal?: AbortSignal;
   } = {},
@@ -36,6 +37,7 @@ export async function request<T>(
         cache: "no-store",
         signal: controller.signal,
         headers: {
+          ...options.headers,
           ...(method !== "GET" ? { "Content-Type": "application/json" } : {}),
           ...(csrf && method !== "GET" ? { "X-CSRF-Token": csrf } : {}),
         },
@@ -104,4 +106,96 @@ export async function readDashboard(signal?: AbortSignal) {
     request<SystemStatus>("/system/status", { signal }),
   ]);
   return { health, status };
+}
+
+export type Project = components["schemas"]["ProjectOut"];
+export type ProjectPage = components["schemas"]["ProjectPage"];
+export type SourceMetadata = Pick<
+  Project,
+  "source_url" | "creator_name" | "rights_status" | "rights_notes"
+>;
+export type StorageDiagnostics = components["schemas"]["StorageDiagnostics"];
+export async function readProjects(
+  search = "",
+  cursor?: string,
+  signal?: AbortSignal,
+) {
+  await initializeSession();
+  const params = new URLSearchParams({ limit: "20", search });
+  if (cursor) params.set("cursor", cursor);
+  return request<ProjectPage>("/projects?" + params, { signal });
+}
+export async function readProject(id: string, signal?: AbortSignal) {
+  await initializeSession();
+  return request<Project>("/projects/" + encodeURIComponent(id), { signal });
+}
+export async function readStorage(signal?: AbortSignal) {
+  await initializeSession();
+  return request<StorageDiagnostics>("/system/diagnostics", { signal });
+}
+export async function updateProject(
+  project: Project,
+  metadata: Partial<SourceMetadata>,
+) {
+  await initializeSession();
+  return request<Project>("/projects/" + project.id, {
+    method: "PATCH",
+    body: metadata,
+    headers: { "If-Match": project.revision },
+  });
+}
+export async function uploadProject(
+  file: File,
+  metadata: SourceMetadata,
+  key: string,
+  signal: AbortSignal,
+  progress: (value: number) => void,
+): Promise<Project> {
+  await initializeSession();
+  if (signal.aborted) throw new ApiError("ABORTED");
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    const abort = () => xhr.abort();
+    const finish = () => signal.removeEventListener("abort", abort);
+    xhr.open("POST", API_BASE + "/projects");
+    xhr.withCredentials = true;
+    xhr.timeout = 300000;
+    xhr.setRequestHeader("Idempotency-Key", key);
+    if (csrf) xhr.setRequestHeader("X-CSRF-Token", csrf);
+    signal.addEventListener("abort", abort, { once: true });
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable)
+        progress(Math.round((event.loaded / event.total) * 100));
+    };
+    xhr.onload = () => {
+      finish();
+      if (xhr.status === 401) csrf = undefined;
+      try {
+        const value = JSON.parse(xhr.responseText);
+        if (xhr.status >= 200 && xhr.status < 300) resolve(value as Project);
+        else
+          reject(
+            new ApiError(value.error?.code ?? "REQUEST_REJECTED", xhr.status),
+          );
+      } catch {
+        reject(new ApiError("REQUEST_REJECTED", xhr.status));
+      }
+    };
+    xhr.onerror = () => {
+      finish();
+      reject(new ApiError("OFFLINE"));
+    };
+    xhr.ontimeout = () => {
+      finish();
+      reject(new ApiError("TIMEOUT"));
+    };
+    xhr.onabort = () => {
+      finish();
+      reject(new ApiError("ABORTED"));
+    };
+    const form = new FormData();
+    form.append("video", file);
+    form.append("metadata", JSON.stringify(metadata));
+    xhr.send(form);
+  });
 }

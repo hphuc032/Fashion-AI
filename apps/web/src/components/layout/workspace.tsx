@@ -51,7 +51,7 @@ export function Workspace({ children }: { children: React.ReactNode }) {
             >
               <Icon size={18} />
               <span>{label}</span>
-              {href !== "/dashboard" && <small>Sắp có</small>}
+              {href === "/settings" && <small>Sắp có</small>}
             </Link>
           ))}
         </nav>
@@ -60,9 +60,9 @@ export function Workspace({ children }: { children: React.ReactNode }) {
             <ShieldCheck size={19} />
           </span>
           <strong>Thiết kế để chạy cục bộ</strong>
-          <p>W1 chỉ kiểm tra kết nối. Chưa chọn hoặc mở kho dữ liệu.</p>
+          <p>Video được lưu cục bộ trong profile đã cấu hình.</p>
           <span className="text-link">
-            Nền tảng Web · W1 <ArrowUpRight size={13} />
+            Quản lý dự án · W2 <ArrowUpRight size={13} />
           </span>
         </div>
         <div className="sidebar-footer">
