@@ -67,3 +67,14 @@ Final source/config/docs audit **150paths**: no credentials/private media/databa
 Implementation commits:5c387e1(plan),0de9ed1(external data/models),cd70b0f(runtime/launcher/build),5fe3547(UI),367f4f9(tests/CI); final documentation/publication commit and PR URL recorded in PR/handoff. M5 remains IN PROGRESS for clean-machine qualification; Draft PR only, no review-ready request, auto-merge, main modification orv1.1.0 release. CI keeps all five old suites/count gates and adds24deterministic M5 checks without skips; remote results reported on the final pushed head.
 
 Normal feature push published implementation/docs head8c8614fdd6893bf196cebec3547e371d719adf05. Created open/unmerged **Draft [PR#10](https://github.com/hphuc032/Fashion-AI/pull/10)** targeting develop. [Branch](https://github.com/hphuc032/Fashion-AI/tree/feature/m5-windows-packaging). Final docs-only publication commit/check results are in PR/final handoff. No reviewers requested while clean-machine gate remains unverified; no binary asset uploaded or M5 merge/tag.
+
+
+## 2026-11-09 — Owner-approved M5 source integration review
+
+The owner requested review and merge of PR #10. This supersedes the earlier draft hold for source integration only; it does not qualify or authorize a public installer/release. Integrated approved develop `4669d2c0962c3d0e519341cf0ec4247c0b4ca935` (W0 + W1) into M5 with a normal merge, no conflicts and no history rewrite. W0 documentation and W1 Web source remain preserved.
+
+Reproduced a Windows status-file reader sharing violation. Fixed bounded atomic status publication retries and retained child process ownership in memory so publication failure cannot clean a stale process or orphan the newly started server. Two new regression cases pass.
+
+Current source verification: 241 M0-M5 deterministic tests passed (60.54s), 56 API/security/Windows lifecycle tests passed (31.85s; one upstream Starlette deprecation warning), 8 frontend tests passed, typecheck/ESLint/production build passed, 6 real Playwright E2E passed (10.0s). Actual Windows source launcher health/duplicate/stop/backup/restore/check and a real status-file sharing retry passed in fresh QA data directories. Existing 1,075 storage files retain identical SHA-256 hashes. Tracked payload/name/size audit found no database, model, video, environment secret or binary payload.
+
+Historical packaged-runtime 244-test results above remain historical; the retained package was not rebuilt in this review. Clean Windows VM installation/upgrade/uninstall, signing/SmartScreen and public installer qualification remain NOT TESTED. No main changes, release/tag, branch deletion or W2 work. GitHub checks on the final pushed head must pass before merge.
