@@ -243,3 +243,7 @@ Kiểm chứng: **177 test pass**, gồm toàn bộ M0–M3/Smart,38 test M3 xá
 [M3_TEST_REPORT.md](docs/M3_TEST_REPORT.md) ghi đủ17 tiêu chí PASS/NOT TESTED, model/giấy phép, test thật so với mock, lệnh PowerShell và contract M4. Gọi `approved_dub(sessions,settings,project_id)` từ `app.services.dubbing_contract` để lấy audio/Chinese+Vietnamese transcript/timestamps/raw TTS/sync/config; hàm chặn output stale/sửa/hỏng/mất quyền. M3 đã merge qua PR #5 và tích hợp M4; workflow mới theo bản phát hành hiện tại.
 
 Lịch sử M0: [PR #1](https://github.com/hphuc032/Fashion-AI/pull/1) đã qua CI và merge; tag chú thích v0.1.0 giữ nguyên trên main. Workflow: docs/GIT_WORKFLOW.md; thông tin hiện tại xem CHANGELOG.md.
+
+## W2 Web project management
+
+The local Web app now supports project library/search/pagination, authorized local video upload, source metadata editing and authenticated video preview with seeking. Configure an **existing, explicitly chosen** database and matching managed storage; Web startup never creates or migrates a user database. See [W2 storage/startup guide](docs/WEB_W2_STORAGE_GUIDE.md), [implementation](docs/WEB_W2_IMPLEMENTATION_REPORT.md) and [verification](docs/WEB_W2_TEST_REPORT.md). OCR, translation, editing, dubbing and final rendering remain unavailable in Web pending later milestones.

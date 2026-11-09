@@ -11,6 +11,9 @@ class WebConfig(BaseModel):
     runtime_dir: Path
     repository: Path
     database_path: Path | None = None
+    storage_root: Path | None = None
+    max_upload_size_mb: int = Field(default=500, gt=0, le=500)
+    max_video_seconds: float = Field(default=180, gt=0, le=180, allow_inf_nan=False)
     ffmpeg: str = "ffmpeg"
     ffprobe: str = "ffprobe"
     frontend_origin: str = "http://127.0.0.1:3000"
@@ -22,7 +25,7 @@ class WebConfig(BaseModel):
     def validate_profile(self):
         if self.frontend_origin != "http://127.0.0.1:3000" or self.backend_host != "127.0.0.1:8000":
             raise ValueError("W1 requires the fixed loopback origins")
-        for p in (self.profile, self.runtime_dir, self.repository, self.database_path):
+        for p in (self.profile, self.runtime_dir, self.repository, self.database_path, self.storage_root):
             if p is not None and not p.is_absolute():
                 raise ValueError("Profile paths must be absolute")
             if p is not None and str(p).startswith(("\\\\", "//")):
@@ -59,5 +62,8 @@ class WebConfig(BaseModel):
         profile = Path(os.environ.get("FASHION_WEB_PROFILE", str(base / "FashionAI")))
         return cls(profile=profile, runtime_dir=profile / "web-runtime", repository=repo,
                    database_path=Path(os.environ["FASHION_WEB_DATABASE"]) if os.environ.get("FASHION_WEB_DATABASE") else None,
+                   storage_root=Path(os.environ["FASHION_WEB_STORAGE"]) if os.environ.get("FASHION_WEB_STORAGE") else None,
+                   max_upload_size_mb=os.environ.get("FASHION_WEB_MAX_UPLOAD_MB", 500),
+                   max_video_seconds=os.environ.get("FASHION_WEB_MAX_VIDEO_SECONDS", 180),
                    ffmpeg=os.environ.get("FASHION_WEB_FFMPEG", "ffmpeg"),
                    ffprobe=os.environ.get("FASHION_WEB_FFPROBE", "ffprobe"))

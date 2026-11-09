@@ -120,13 +120,13 @@ test("real authenticated dashboard, contract and preserved data", async ({
   });
   expect(state.models).toBe("not_inspected");
   await expect(page.getByTestId("schema-status")).toHaveText("not_inspected");
-  await expect(page.getByText("Chưa khả dụng trong W1")).toBeVisible();
+  await expect(page.getByText("Các bước AI chưa khả dụng")).toBeVisible();
   expect(
     await page.getByRole("button", { name: /OCR|render|tải video/i }).count(),
   ).toBe(0);
-  await page.getByRole("link", { name: /Dự án Sắp có/ }).click();
+  await page.getByRole("link", { name: /^Dự án$/ }).click();
   await expect(
-    page.getByRole("heading", { name: "Dự án sẽ có ở W2" }),
+    page.getByRole("heading", { name: "Dự án video" }),
   ).toBeVisible();
   await page.getByRole("link", { name: "Tổng quan", exact: true }).click();
   await expect(page.getByText("Backend đang online")).toBeVisible();
@@ -231,5 +231,5 @@ test("small viewport stays within width and keyboard navigation works", async ({
   await page.keyboard.press("Enter");
   await expect(page.locator("#main")).toBeFocused();
   await page.getByRole("button", { name: "Mở hoặc đóng điều hướng" }).click();
-  await expect(page.getByRole("link", { name: /Dự án Sắp có/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: /^Dự án$/ })).toBeVisible();
 });

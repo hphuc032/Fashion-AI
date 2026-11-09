@@ -34,6 +34,15 @@ jobs:
       - name: Frozen frontend installation
         working-directory: apps/web
         run: npm ci
+      - name: Verify real media tools for W2 fixtures
+        run: |
+          if (-not (Get-Command ffmpeg -ErrorAction SilentlyContinue)) {
+            choco install ffmpeg --yes --no-progress --limit-output
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+          ffmpeg -version
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          ffprobe -version
       - name: Types, lint, components and production build
         working-directory: apps/web
         run: |
@@ -51,7 +60,9 @@ jobs:
       - name: API, negative security and actual Windows lifecycle
         run: |
           $env:PYTHONPATH = Join-Path $PWD 'apps/api'
-          python -B -m pytest -c apps/api/pytest.ini apps/api/tests -q -p no:cacheprovider
+          python -B -m pytest -c apps/api/pytest.ini apps/api/tests -q -p no:cacheprovider --junitxml=web-results.xml
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -c "import xml.etree.ElementTree as E; s=E.parse('web-results.xml').getroot().findall('testsuite'); t={k:sum(int(x.get(k,0)) for x in s) for k in ('tests','failures','errors','skipped')}; print(t); assert t['tests']>=75 and t['failures']==t['errors']==t['skipped']==0"
       - name: Real two-service browser integration
         working-directory: apps/web
         run: |

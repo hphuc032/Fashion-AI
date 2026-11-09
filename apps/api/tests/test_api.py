@@ -57,7 +57,8 @@ def test_openapi_is_protected_and_schema_matches_committed(client):
     actual = client.get("/api/v1/openapi.json").json()
     expected = json.loads(Path(__file__).resolve().parents[1].joinpath("openapi.json").read_text(encoding="utf-8"))
     assert actual == expected
-    assert not any(route in actual["paths"] for route in ["/api/v1/projects", "/api/v1/jobs"])
+    assert '/api/v1/projects' in actual['paths']
+    assert '/api/v1/jobs' not in actual['paths']
 
 
 def test_redacted_validation_does_not_echo_secret_path(client):
