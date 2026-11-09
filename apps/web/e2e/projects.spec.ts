@@ -226,6 +226,10 @@ test("real authorized upload, library, metadata, playback, range seeking and res
   startApi();
   await ready(api + "/health");
   await page.goto(origin + "/dashboard#bootstrap=" + secret);
+  // A full navigation from the library starts bootstrap immediately. Await
+  // the session exchange before reloading; otherwise the reload aborts the
+  // one-use exchange after the fragment has already been cleared.
+  await expect(page.getByText("Backend đang online")).toBeVisible();
   await page.reload();
   await expect(page.getByText("Backend đang online")).toBeVisible();
   await page.goto(origin + "/projects/" + created.id);

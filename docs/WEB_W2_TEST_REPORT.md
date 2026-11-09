@@ -68,6 +68,8 @@ First combined browser run: 6 passed/1 failed at rights selector lookup; the sel
 
 One upstream Starlette httpx TestClient deprecation warning remains in the pinned working stack. It does not affect current passing integration. No dependencies were upgraded to hide it.
 
+First hosted head `e425766` passed all six legacy jobs, frozen installs, type/lint/build, 15 frontend tests and all 76 Python cases (33.81 s). Hosted browser run passed six W1 cases and progressed through the real W2 upload/metadata/player/Range flow, then failed at the post-restart dashboard: the test reloaded a full-navigation bootstrap page immediately, potentially aborting the one-use exchange after fragment removal. Corrected the test to wait for the authenticated online state before reload, then assert online/persistence again. This preserves real authentication and all restart assertions; no timeout extension, mock or automatic test retry was added. Final-head hosted evidence is recorded in PR metadata/final handoff.
+
 ## Not tested / approval boundary
 
 Not tested: new AI inference, OCR/translation, cloud/GPU providers, long-video throughput/RAM benchmark, every supported codec/player/Windows version, complete hostile-parser sandboxing, every-frame corruption detection, power-loss recovery, arbitrary Web-profile backup/restore UI and installer/signing qualification. M5 backup/restore tests are part of the 241 existing regression cases in their supported disposable layout; no production backup or restore was performed. See implementation report/storage guide for cancellation/crash limitations and explicit live-profile adoption.
