@@ -6,6 +6,21 @@ M5 dùng PyInstaller launcher dạng thư mục, kèm CPython3.11/dependencies/F
 
 Hướng dẫn: [Windows installation](docs/WINDOWS_INSTALLATION.md), [troubleshooting](docs/WINDOWS_TROUBLESHOOTING.md), [M5 test report](docs/M5_TEST_REPORT.md). Bản local Windows đã được kiểm thử trực tiếp; **Windows sạch/installer chưa được kiểm chứng**, không công bố installer hoặc coi đây là release v1.1.0.
 
+## Local Web foundation — W1
+
+W1 adds a separate Next.js/FastAPI health workspace at `http://127.0.0.1:3000`.
+It does not open/migrate a database, adopt existing storage or run AI jobs.
+Projects and Settings are unavailable placeholders; the existing Streamlit
+workflow below remains the working M0–M4 interface.
+
+Use Python3.11 and Node24/npm11. Install `apps/api/requirements.lock` with
+`--require-hashes` into `.venv-web`, then run `npm ci` and `npm run build`
+inside `apps/web`. From repository root, run `scripts/start_web.ps1` and use
+`scripts/stop_web.ps1` for owned-process shutdown. Startup never installs
+dependencies/models and refuses occupied ports3000/8000.
+
+See [W1 setup, security, verification and limitations](docs/WEB_W1_IMPLEMENTATION_REPORT.md).
+
 ## M4 — Final Export Studio
 
 M4 nối video M2 đã hoàn tất với WAV/lời nói Việt M3 đã duyệt, tạo ASS UTF-8 và MP4 H.264/AAC. Chọn **Final Export Studio**, áp dụng cấu hình, tạo/xem preview, xác nhận quyền nguồn và kiểm tra sync rồi xuất cuối. Không chạy lại OCR, dịch hay TTS. Thiếu artifact hoặc bản duyệt thay đổi sẽ chặn xuất.
